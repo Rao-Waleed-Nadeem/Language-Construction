@@ -288,9 +288,9 @@ class TACGenerator:
                 self.emit("READ", Constant(type_name, "type"), None, t_read, span=span, ast_id=ast_id, rule_id="TAC-READ")
                 self.emit(
                     "ARRAY_SET",
-                    t_read,
-                    idx,
                     Variable(arr_name),
+                    idx,
+                    t_read,
                     span=span,
                     ast_id=ast_id,
                     rule_id="TAC-READ-ARRAY",
@@ -337,9 +337,9 @@ class TACGenerator:
                 elem_val = self._lower_expr(init_elem)
                 self.emit(
                     "ARRAY_SET",
-                    elem_val,
-                    Constant(i, "int"),
                     Variable(var_name),
+                    Constant(i, "int"),
+                    elem_val,
                     span=span,
                     ast_id=ast_id,
                     rule_id=rule_id,
@@ -392,16 +392,16 @@ class TACGenerator:
                 self.emit("ARRAY_GET", arr_var, idx, cur, span=span, ast_id=ast_id, rule_id="TAC-ARRAY-GET")
                 res = self.new_temp()
                 self.emit("ADD", cur, Constant(1, "int"), res, span=span, ast_id=ast_id, rule_id="TAC-INCREMENT")
-                self.emit("ARRAY_SET", res, idx, arr_var, span=span, ast_id=ast_id, rule_id="TAC-ARRAY-SET")
+                self.emit("ARRAY_SET", arr_var, idx, res, span=span, ast_id=ast_id, rule_id="TAC-ARRAY-SET")
             elif stmt.op == "--":
                 cur = self.new_temp()
                 self.emit("ARRAY_GET", arr_var, idx, cur, span=span, ast_id=ast_id, rule_id="TAC-ARRAY-GET")
                 res = self.new_temp()
                 self.emit("SUB", cur, Constant(1, "int"), res, span=span, ast_id=ast_id, rule_id="TAC-DECREMENT")
-                self.emit("ARRAY_SET", res, idx, arr_var, span=span, ast_id=ast_id, rule_id="TAC-ARRAY-SET")
+                self.emit("ARRAY_SET", arr_var, idx, res, span=span, ast_id=ast_id, rule_id="TAC-ARRAY-SET")
             elif stmt.op == "=" and stmt.value is not None:
                 val = self._lower_expr(stmt.value)
-                self.emit("ARRAY_SET", val, idx, arr_var, span=span, ast_id=ast_id, rule_id="TAC-ARRAY-SET")
+                self.emit("ARRAY_SET", arr_var, idx, val, span=span, ast_id=ast_id, rule_id="TAC-ARRAY-SET")
             elif stmt.value is not None:
                 cur = self.new_temp()
                 self.emit("ARRAY_GET", arr_var, idx, cur, span=span, ast_id=ast_id, rule_id="TAC-ARRAY-GET")
@@ -410,7 +410,7 @@ class TACGenerator:
                 op_name = OP_MAP[op_char]
                 res = self.new_temp()
                 self.emit(op_name, cur, val, res, span=span, ast_id=ast_id, rule_id="TAC-COMPOUND-ARRAY-SET")
-                self.emit("ARRAY_SET", res, idx, arr_var, span=span, ast_id=ast_id, rule_id="TAC-ARRAY-SET")
+                self.emit("ARRAY_SET", arr_var, idx, res, span=span, ast_id=ast_id, rule_id="TAC-ARRAY-SET")
 
     def _lower_if_stmt(self, stmt: IfStmt) -> None:
         cond_val = self._lower_expr(stmt.condition)

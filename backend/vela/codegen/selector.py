@@ -19,6 +19,7 @@ from vela.codegen.isa import (
     TargetProgram,
 )
 from vela.ir.tac import Constant, Label, TACInstruction, TACProgram, Temporary, Variable
+from vela.opt.passes.dce import is_global_var
 
 
 def _convert_operand(op: Any) -> Any:
@@ -28,8 +29,11 @@ def _convert_operand(op: Any) -> Any:
         return Immediate(op.value)
     if isinstance(op, Label):
         return op.name
-    if isinstance(op, (Variable, Temporary)):
-        # By default in unallocated selection, variables are represented by name
+    if isinstance(op, Variable):
+        if is_global_var(op.name):
+            return MemoryRef(symbol=op.name)
+        return op.name
+    if isinstance(op, Temporary):
         return str(op)
     return str(op)
 
@@ -163,14 +167,15 @@ class InstructionSelector:
 
         elif op == "ARRAY_GET":
             # Load from array element: dst = array[index]
-            self._emit("LOAD", dst=dst, src1=MemoryRef(symbol=str(a1), offset=0), src2=a2, tac_index=tac_idx, rule_name="SEL-ARRAY-GET")
+            self._emit("LOAD", dst=dst, src1=a1, src2=a2, tac_index=tac_idx, rule_name="SEL-ARRAY-GET")
 
         elif op == "ARRAY_SET":
             # Store into array element: array[index] = val
-            self._emit("STORE", dst=MemoryRef(symbol=str(a1), offset=0), src1=a2, src2=dst, tac_index=tac_idx, rule_name="SEL-ARRAY-SET")
+            self._emit("STORE", dst=a1, src1=a2, src2=dst, tac_index=tac_idx, rule_name="SEL-ARRAY-SET")
 
         elif op == "CAST":
-            self._emit("MOV", dst=dst, src1=a1, tac_index=tac_idx, rule_name="SEL-CAST")
+            target_t = a2.value if hasattr(a2, "value") else str(a2)
+            self._emit("CAST", dst=dst, src1=a1, src2=Immediate(target_t), tac_index=tac_idx, rule_name="SEL-CAST")
 
         else:
             self._emit(op, dst=dst, src1=a1, src2=a2, tac_index=tac_idx, rule_name="SEL-RAW")

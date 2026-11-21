@@ -364,9 +364,18 @@ class TACInterpreter:
                     pc += 1
 
                 elif op == "ARRAY_SET":
-                    val = get_op_val(instr.arg1)
+                    op1 = get_op_val(instr.arg1)
+                    op3 = get_op_val(instr.result)
+                    if isinstance(op1, list):
+                        arr = op1
+                        val = op3
+                    elif isinstance(op3, list):
+                        arr = op3
+                        val = op1
+                    else:
+                        arr = op1
+                        val = op3
                     idx = int(get_op_val(instr.arg2))
-                    arr = get_op_val(instr.result)
                     if not isinstance(arr, list) or idx < 0 or idx >= len(arr):
                         sz = len(arr) if isinstance(arr, list) else 0
                         raise TACRuntimeError(

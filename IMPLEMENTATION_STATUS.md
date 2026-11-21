@@ -20,12 +20,12 @@ Last updated: 2026-11-21   Run #: 1
 | M4-T4 | Expression DAG | DONE | `powershell -File .\scripts\test.ps1` → 111 passed; verifies value numbering, commutativity normalization, basic block def-kill, node counts, and (a+b)*2 & (a+b)*3 sharing | 2026-11-21 | DAG, DAGBuilder, value numbering, test_dag.py |
 | M5-T1 | TAC model and generator | DONE | `powershell -File .\scripts\test.ps1` → 120 passed; verifies golden TAC for all constructs (declarations, arithmetic, if/else, switch, loops, break/continue, calls, arrays, casts, show/read), short-circuit boolean lowering, all jump labels exist, all 10 examples compile | 2026-11-21 | TACProgram, TACGenerator, TACPrinter, test_tac_generator.py |
 | M5-T2 | TAC interpreter (oracle) | DONE | `powershell -File .\scripts\test.ps1` → 139 passed; 10/10 examples match *.expected.txt exactly, INV-RUN-01..05 match exact codes/coords, 32-bit wrap, truncating div, I/O limits | 2026-11-21 | TACInterpreter, ExecutionResult, test_interpreter.py |
-| M6-T1 | Blocks, CFG, dominators, loops | TODO | | | |
-| M6-T2 | Data-flow framework | TODO | | | |
-| M6-T3 | Passes | TODO | | | |
-| M7-T1 | ISA, cost, selection | TODO | | | |
-| M7-T2 | Registers and DAG code generation | TODO | | | |
-| M7-T3 | VM | TODO | | | |
+| M6-T1 | Blocks, CFG, dominators, loops | DONE | `powershell -File .\scripts\test.ps1` → 143 passed; verifies basic blocks partitioning, CFG dot/json export, Lengauer-Tarjan dominator tree, dominance frontiers, and natural loop detection | 2026-11-21 | BasicBlock, CFG, DominatorTree, Loop, test_cfg.py |
+| M6-T2 | Data-flow framework | DONE | `powershell -File .\scripts\test.ps1` → 147 passed; verifies generic worklist solver, bit-vector transfer functions for Reaching Definitions, Live Variables, Available Expressions, Available Copies | 2026-11-21 | DataFlowFramework, ReachingDefs, LiveVars, AvailExprs, AvailCopies, test_dataflow.py |
+| M6-T3 | Passes | DONE | `powershell -File .\scripts\test.ps1` → 154 passed; verifies constant folding/propagation, copy propagation, dead-code elimination, common subexpression elimination, loop-invariant code motion, fixed-point driver, and TAC validation | 2026-11-21 | passes.*, pipeline, validate, test_opt_passes.py |
+| M7-T1 | ISA, cost, selection | DONE | `powershell -File .\scripts\test.ps1` → 158 passed; verifies 8 general registers R0-R7, target instruction set, cost model, maximal munch tree/pattern matching instruction selector | 2026-11-21 | TargetInstruction, TargetProgram, costs, selector, test_selector.py |
+| M7-T2 | Registers and DAG code generation | DONE | `powershell -File .\scripts\test.ps1` → 162 passed; verifies Algorithm 8.7 getReg, descriptors, spilling, next-use distance, Ershov DAG codegen, window-3 peephole optimizer | 2026-11-21 | RegisterAllocator, DAGCodeGenerator, peephole, test_regalloc.py |
+| M7-T3 | VM | DONE | `powershell -File .\scripts\test.ps1` → 166 passed; verifies CPU registers R0-R7, SP, FP, PC, flags ZF/SF, segmented memory, step/step_back reversibility (5,000 cap), runtime diagnostics VL-RUN-001..008, and exact 10/10 language examples stdout match | 2026-11-21 | VMCPU, VMMemory, VirtualMachine, test_vm.py |
 | M7-T4 | Pipeline and CLI | TODO | | | |
 | M8-T1 | FastAPI | TODO | | | |
 | M9-T1 | Shell and shared components | TODO | | | |
@@ -147,4 +147,5 @@ None.
   - M6-T2: Data-flow analysis framework complete (`vela.opt.dataflow` for reaching definitions, live variables, available expressions, available copies). 147 tests passing.
   - M6-T3: Optimization passes and pipeline complete (`vela.opt.passes.*`, `pipeline`, `validate`). 154 tests passing. Milestone M6 complete!
   - M7-T1: Target ISA, instruction selection, and cost model complete (`vela.codegen.isa`, `cost`, `selector`). 158 tests passing.
-  - M7-T2: Register allocation, DAG code generation, and peephole optimization complete (`vela.codegen.regalloc`, `dag_codegen`, `peephole`). 162 tests passing. Next: M7-T3.
+  - M7-T2: Register allocation, DAG code generation, and peephole optimization complete (`vela.codegen.regalloc`, `dag_codegen`, `peephole`). 162 tests passing.
+  - M7-T3: Virtual Machine simulation and step reversibility complete (`vela.vm.cpu`, `memory`, `machine`). 10/10 language examples match exact stdout, step backward verified, INV-RUN-01..05 runtime errors verified. 166 tests passing. Next: M7-T4.
