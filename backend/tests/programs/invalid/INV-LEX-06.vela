@@ -1,0 +1,3 @@
+func main() { // INV-LEX-06
+    let x: int = 2147483648;
+}

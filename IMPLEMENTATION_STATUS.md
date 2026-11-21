@@ -26,7 +26,7 @@ Last updated: 2026-11-21   Run #: 1
 | M7-T1 | ISA, cost, selection | DONE | `powershell -File .\scripts\test.ps1` → 158 passed; verifies 8 general registers R0-R7, target instruction set, cost model, maximal munch tree/pattern matching instruction selector | 2026-11-21 | TargetInstruction, TargetProgram, costs, selector, test_selector.py |
 | M7-T2 | Registers and DAG code generation | DONE | `powershell -File .\scripts\test.ps1` → 162 passed; verifies Algorithm 8.7 getReg, descriptors, spilling, next-use distance, Ershov DAG codegen, window-3 peephole optimizer | 2026-11-21 | RegisterAllocator, DAGCodeGenerator, peephole, test_regalloc.py |
 | M7-T3 | VM | DONE | `powershell -File .\scripts\test.ps1` → 166 passed; verifies CPU registers R0-R7, SP, FP, PC, flags ZF/SF, segmented memory, step/step_back reversibility (5,000 cap), runtime diagnostics VL-RUN-001..008, and exact 10/10 language examples stdout match | 2026-11-21 | VMCPU, VMMemory, VirtualMachine, test_vm.py |
-| M7-T4 | Pipeline and CLI | TODO | | | |
+| M7-T4 | Pipeline and CLI | DONE | `powershell -File .\scripts\test.ps1` → 174 passed; verifies phase-gated pipeline compile_source, timings, VM and TAC oracle execution, CLI subcommands (compile, run, verify, selftest), and 50/50 (100%) passing selftest corpus | 2026-11-21 | compile_source, run_program, cli, test_pipeline_cli.py |
 | M8-T1 | FastAPI | TODO | | | |
 | M9-T1 | Shell and shared components | TODO | | | |
 | M9-T2 | Playground and Dashboard | TODO | | | |
@@ -148,4 +148,5 @@ None.
   - M6-T3: Optimization passes and pipeline complete (`vela.opt.passes.*`, `pipeline`, `validate`). 154 tests passing. Milestone M6 complete!
   - M7-T1: Target ISA, instruction selection, and cost model complete (`vela.codegen.isa`, `cost`, `selector`). 158 tests passing.
   - M7-T2: Register allocation, DAG code generation, and peephole optimization complete (`vela.codegen.regalloc`, `dag_codegen`, `peephole`). 162 tests passing.
-  - M7-T3: Virtual Machine simulation and step reversibility complete (`vela.vm.cpu`, `memory`, `machine`). 10/10 language examples match exact stdout, step backward verified, INV-RUN-01..05 runtime errors verified. 166 tests passing. Next: M7-T4.
+  - M7-T3: Virtual Machine simulation and step reversibility complete (`vela.vm.cpu`, `memory`, `machine`). 10/10 language examples match exact stdout, step backward verified, INV-RUN-01..05 runtime errors verified. 166 tests passing.
+  - M7-T4: End-to-end compilation pipeline and CLI driver complete (`vela.pipeline`, `vela.cli`). 50/50 test programs in selftest corpus pass at 100%. 174 tests passing. Milestone M7 complete! Next: Milestone M8 (FastAPI Backend).

@@ -1,0 +1,3 @@
+func main() { // INV-LEX-05
+    show "a\qb";
+}

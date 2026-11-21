@@ -1,0 +1,4 @@
+func main() { // INV-LEX-04
+    /* never closed
+    show 1;
+}

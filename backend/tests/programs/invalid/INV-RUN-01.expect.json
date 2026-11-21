@@ -1,0 +1,7 @@
+{
+  "valid": true,
+  "compiles": true,
+  "stage": "runtime",
+  "code": "VL-RUN-001",
+  "stdin": "0\n"
+}

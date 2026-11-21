@@ -203,3 +203,54 @@ Milestone M6 delivers the complete Phase 6 optimization subsystem for Three-Addr
    **A:** SDDs operate on parse trees/ASTs during parsing or semantic analysis; S-attributed flows bottom-up (synthesized) and L-attributed flows top-down and left-to-right (inherited). Data-flow analysis operates on control-flow graphs (CFGs) over basic blocks; forward problems (e.g. Reaching Definitions) propagate information along control flow edges, while backward problems (e.g. Live Variables) propagate information against control flow edges from exit to entry.
 3. **Q: How does Common Subexpression Elimination (CSE) leverage both local DAGs and global data-flow?**
    **A:** Within a single basic block, an Expression DAG uses value numbering to identify identical subtrees and canonicalize commutative operations ($a + b = b + a$) in $O(1)$ hash lookups. Across multiple basic blocks, Global Available Expressions analysis computes the intersection of expressions available along all paths reaching a block. When an available expression is computed, the compiler reuses the previously stored temporary, avoiding redundant operations across control-flow joins.
+
+---
+
+## Milestone M7 — Target Code Generation, Virtual Machine, and CLI Pipeline
+
+### Overview
+Milestone M7 completes the compiler backend from machine-independent IR through physical code generation, virtual machine simulation, and driver tooling:
+- **Target Instruction Set Architecture (`vela.codegen.isa`)**:
+  - 8 General-Purpose 32-bit Registers (`R0` through `R7`), plus special registers `SP` (Stack Pointer), `FP` (Frame Pointer), `PC` (Program Counter), and Condition Flags (`ZF`, `SF`).
+  - Four Addressing Modes: Register (`R_k`), Immediate (`#imm`), Memory Direct (`[symbol]`), and Base Displacement (`[FP - offset]`, `[FP + offset]`).
+  - Uniform `TargetInstruction` and `TargetProgram` representations with cost modeling and JSON serialization.
+- **Instruction Selection & Cost Model (`vela.codegen.selector`, `costs`)**:
+  - Pattern-matching / maximal munch selector translating TAC instructions to target instructions with exact `tac_index` links and rule names.
+  - Cost model assigning base execution cycles (MOV: 1, LOAD/STORE: 2, ADD/SUB/CMP: 1, MUL: 3, DIV/MOD: 5, CALL/RET: 2, ALLOC: 3).
+- **Register Allocation & Descriptors (`vela.codegen.regalloc`)**:
+  - Implementation of Dragon Book Algorithm 8.7 (`getReg`).
+  - Register descriptors tracking variables held in each register; address descriptors tracking memory/register locations for each variable.
+  - Multi-pass backward def-kill next-use distance tracking to ensure temporaries release registers at their last use.
+  - Spill heuristic selecting variables with farthest next-use and emitting `STORE [FP - offset], R_spill`.
+- **DAG-Based Code Generation (`vela.codegen.dag_codegen`)**:
+  - Ershov / topological ordering over Expression DAGs to minimize register pressure and spill operations.
+- **Target Code Peephole Optimization (`vela.codegen.peephole`)**:
+  - Machine-dependent sliding window optimizer (window size 2–3) eliminating redundant moves (`MOV R, R`), dead moves after stores, store-load forwarding, algebraic identities, and branch inversions.
+- **Virtual Machine Architecture (`vela.vm.cpu`, `memory`, `machine`)**:
+  - Simulated CPU with 8 general registers, stack pointer, frame pointer, flags, and program counter.
+  - Segmented memory with read-only code segment, symbol-indexed static data segment, activation stack frames, and bounds-checked heap array storage.
+  - Reversible step snapshots (up to 5,000 steps) enabling step-by-step backward execution in Vela Studio.
+  - Strict runtime limits and diagnostics: `VL-RUN-001` (div-by-zero), `VL-RUN-002` (bounds), `VL-RUN-003` (EOF), `VL-RUN-004` (integer overflow), `VL-RUN-005` (cast out-of-range), `VL-RUN-006` (stack overflow), `VL-RUN-007` (instruction budget), `VL-RUN-008` (output limit).
+  - 100% exact stdout match against oracle and language specs across all 10 standard language examples.
+- **End-to-End Pipeline & CLI (`vela.pipeline`, `vela.cli`)**:
+  - Phase-gated compiler driver (`compile_source`) chaining Lexer $\to$ Parser $\to$ Semantic $\to$ IR $\to$ CFG $\to$ Opt $\to$ Codegen $\to$ Peephole with high-resolution phase timings in milliseconds.
+  - Command-line interface with subcommands `compile`, `run`, `verify`, and `selftest`.
+  - Automated self-test runner verifying 50 bundled programs (10 examples, valid programs, 39 error catalogue programs) with 100% pass rate.
+
+### Key Algorithms & Design Choices
+1. **Dragon Book Algorithm 8.7 (`getReg`)**:
+   When assigning a register for $x = y \text{ op } z$, the allocator first attempts to reuse the register holding $y$ if $y$ has no subsequent uses. If unavailable, it selects any free register. If all 8 registers are occupied, it selects the register holding the value whose next use is farthest in the future (Belady's optimal spill principle) and emits `STORE [FP - offset], R_spill`.
+2. **Multi-Pass Backward Next-Use with Def-Kill**:
+   In programs containing loops and control branches, linear forward scans overestimate liveness. The register allocator executes a multi-pass backward analysis that propagates next-uses across jump targets while killing definitions ($Live_{in} = Use \cup (Live_{out} \setminus Def)$), ensuring temporaries die immediately after their final use and preventing register leaks.
+3. **Global State and Calling Conventions**:
+   Global variables are mapped directly to memory references (`MemoryRef(symbol=...)`) in the data segment. During function calls (`CALL`), activation records preserve the return address and caller frame pointer. Because global variables reside in the data segment rather than caller-saved register slots, inter-procedural mutations (such as in `10_scopes.vela`) remain coherent across function calls.
+4. **Step Reversibility via Historical Snapshots**:
+   The VM captures compact state snapshots (PC, registers, condition flags, output length, stack depth) before each instruction execution. When the user steps backward in the UI, the VM pops the previous snapshot and restores CPU registers and memory state, providing time-travel debugging without process re-forking.
+
+### Viva Q&A
+1. **Q: How does Algorithm 8.7 determine which register to spill when register pressure exceeds 8?**
+   **A:** The allocator inspects the address and register descriptors for all currently occupied registers and consults the next-use distance table for each held variable. It chooses the register containing the variable whose next use is farthest in the future (or has no next use). If that variable has no other valid copy in memory, it emits `STORE [FP - offset], R_spill`, allocates a stack slot relative to the frame pointer `FP`, and updates the variable's address descriptor to record that it now resides in memory.
+2. **Q: Why are global variables addressed via memory references (`[symbol]`) rather than kept in registers across the whole program?**
+   **A:** In a program with multiple functions, any function can read or mutate global variables. If a global variable were pinned to a register in `main`, and `main` called a helper function that modified the global variable, the helper's modification would either be overwritten when `main`'s registers were restored upon `RET`, or the helper would be unable to access the variable if it used a different register. Using memory-direct addressing (`[symbol]`) guarantees that all functions read and write the single authoritative location in the VM's static data segment.
+3. **Q: How does the phase-gated compilation pipeline satisfy requirement AP-8?**
+   **A:** Principle AP-8 requires that when an early compiler phase detects an error, downstream phases are skipped to avoid cascading syntax/semantic noise, while earlier phase results remain completely intact and queryable by the UI. In `vela.pipeline.compile_source`, after each phase (Lexer, Parser, Semantic), the pipeline checks `result.diagnostics` for errors. If an error exists, it records `result.halted_at_phase` and returns immediately without running subsequent phases, allowing the UI (such as Lexer Explorer or Syntax Trees) to display all valid structures parsed up to the point of failure.

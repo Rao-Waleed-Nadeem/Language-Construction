@@ -1,0 +1,3 @@
+func main() { // INV-LEX-03
+    let x: int = 12abc;
+}
