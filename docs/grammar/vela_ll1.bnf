@@ -1,0 +1,103 @@
+# ============================================================================
+# VELA — LL(1) GRAMMAR  G'  (derived from vela.bnf)
+# ----------------------------------------------------------------------------
+# Derived from G by (1) eliminating left recursion and (2) left factoring.
+# Nonterminal names below are hand-chosen for readability; the Grammar Lab's
+# automatic transformation produces equivalent grammars with primed names.
+# Recursive-descent parser (backend/vela/parser/) follows THIS grammar.
+# Start symbol: Program
+# ============================================================================
+
+Program      -> TopList
+TopList      -> TopItem TopList | ε
+TopItem      -> FuncDecl | VarDecl
+
+FuncDecl     -> func ID ( ParamsOpt ) RetType Block
+RetType      -> : BaseType | ε
+ParamsOpt    -> Param ParamTail | ε
+ParamTail    -> , Param ParamTail | ε
+Param        -> ID : BaseType ArrayMark
+ArrayMark    -> [ ] | ε
+
+BaseType     -> int | float | char | string | bool
+
+# left factoring of the four `let` alternatives
+VarDecl      -> let ID : BaseType DeclRest ;
+DeclRest     -> [ INT_LIT ] ArrInit | ScalarInit
+ArrInit      -> = { ExprListOpt } | ε
+ScalarInit   -> = Expr | ε
+ExprListOpt  -> ExprList | ε
+ExprList     -> Expr ExprTail
+ExprTail     -> , Expr ExprTail | ε
+
+Block        -> { StmtList }
+StmtList     -> Stmt StmtList | ε
+
+# left factoring on the common prefix ID
+Stmt         -> VarDecl
+             | ID IdStmtTail ;
+             | IfStmt
+             | SwitchStmt
+             | WhileStmt
+             | DoWhileStmt
+             | ForStmt
+             | return ExprOpt ;
+             | break ;
+             | continue ;
+             | show ExprList ;
+             | read ID IndexOpt ;
+             | Block
+IdStmtTail   -> ( ArgsOpt ) | IndexOpt AssignTail
+
+SimpleAssign -> ID IndexOpt AssignTail
+AssignTail   -> AssignOp Expr | ++ | --
+IndexOpt     -> [ Expr ] | ε
+AssignOp     -> = | += | -= | *= | /= | %=
+ArgsOpt      -> ExprList | ε
+ExprOpt      -> Expr | ε
+
+# left factoring of the three `if` alternatives
+IfStmt       -> if ( Expr ) Block ElsePart
+ElsePart     -> else ElseBody | ε
+ElseBody     -> IfStmt | Block
+
+SwitchStmt   -> switch ( Expr ) { CaseList DefaultOpt }
+CaseList     -> CaseClause CaseList | ε
+CaseClause   -> case CaseLabels : StmtList
+CaseLabels   -> CaseConst LabelTail
+LabelTail    -> , CaseConst LabelTail | ε
+CaseConst    -> INT_LIT | CHAR_LIT | - INT_LIT
+DefaultOpt   -> default : StmtList | ε
+
+WhileStmt    -> while ( Expr ) Block
+DoWhileStmt  -> do Block while ( Expr ) ;
+ForStmt      -> for ( ForInit ; ExprOpt ; ForUpdate ) Block
+ForInit      -> let ID : BaseType = Expr | SimpleAssign | ε
+ForUpdate    -> SimpleAssign | ε
+
+# left recursion elimination:  A -> A op B | B   ==>   A -> B ATail ; ATail -> op B ATail | ε
+Expr         -> OrExpr
+OrExpr       -> AndExpr OrTail
+OrTail       -> or AndExpr OrTail | ε
+AndExpr      -> NotExpr AndTail
+AndTail      -> and NotExpr AndTail | ε
+NotExpr      -> not NotExpr | EqExpr
+EqExpr       -> RelExpr EqTail
+EqTail       -> EqOp RelExpr EqTail | ε
+EqOp         -> == | !=
+RelExpr      -> AddExpr RelTail
+RelTail      -> RelOp AddExpr RelTail | ε
+RelOp        -> < | <= | > | >=
+AddExpr      -> MulExpr AddTail
+AddTail      -> AddOp MulExpr AddTail | ε
+AddOp        -> + | -
+MulExpr      -> UnaryExpr MulTail
+MulTail      -> MulOp UnaryExpr MulTail | ε
+MulOp        -> * | / | %
+UnaryExpr    -> - UnaryExpr | CastExpr
+CastExpr     -> Primary CastTail
+CastTail     -> as BaseType CastTail | ε
+Primary      -> INT_LIT | FLOAT_LIT | CHAR_LIT | STRING_LIT | true | false
+             | ( Expr )
+             | ID PrimaryTail
+PrimaryTail  -> ( ArgsOpt ) | IndexOpt

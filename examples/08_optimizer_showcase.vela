@@ -1,0 +1,28 @@
+// 08_optimizer_showcase.vela - gives every optimization something to do
+// stdin for the expected output:  5 7 3
+//   constant folding:        2 * 3 + 4
+//   constant/copy propagation: scale, c
+//   dead code:               unused
+//   common subexpression:    (a + b) * 2  and  (a + b) * 3
+//   loop-invariant code:     a * b inside the loop
+func main() {
+    let n: int;
+    let a: int;
+    let b: int;
+    read n;
+    read a;
+    read b;
+
+    let scale: int = 2 * 3 + 4;
+    let unused: int = scale * 99;
+    let total: int = 0;
+    for (let i: int = 0; i < n; i++) {
+        let k: int = a * b;
+        total += k + i * scale;
+    }
+
+    let x: int = (a + b) * 2;
+    let y: int = (a + b) * 3;
+    let c: int = x;
+    show total, " ", y + c;
+}

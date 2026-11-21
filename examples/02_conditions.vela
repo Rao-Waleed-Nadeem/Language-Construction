@@ -1,0 +1,21 @@
+// 02_conditions.vela - if, else if, else, nested if, function with returns on every path
+func classify(n: int): string {
+    if (n < 0) {
+        return "negative";
+    } else if (n == 0) {
+        return "zero";
+    } else {
+        if (n % 2 == 0) {
+            return "positive even";
+        } else {
+            return "positive odd";
+        }
+    }
+}
+
+func main() {
+    show classify(-5);
+    show classify(0);
+    show classify(7);
+    show classify(10);
+}

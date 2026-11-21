@@ -1,0 +1,5 @@
+# title: LALR(1) fails, CLR(1) succeeds
+# demonstrates: state merging creating a reduce/reduce conflict; CLR 14 states, LALR 13 states (2 conflicts)
+S -> a A d | b B d | a B e | b A e
+A -> c
+B -> c

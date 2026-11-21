@@ -1,0 +1,6 @@
+# title: Classic left-recursive expressions
+# demonstrates: FIRST/FOLLOW, SLR(1) parsing, left recursion elimination, operator precedence parsing
+# expected: not LL(1) (left recursion); LR(0) has shift/reduce conflicts; SLR(1)/LALR(1)/CLR(1) ok
+E -> E + T | T
+T -> T * F | F
+F -> ( E ) | id

@@ -1,0 +1,4 @@
+# title: Dangling else (ambiguous)
+# demonstrates: shift/reduce conflict on 'e'; resolve by "prefer shift" (else binds to nearest if)
+# expected: ambiguous; SLR(1) 1 conflict on lookahead e; LALR(1) and CLR(1) report the same conflict
+S -> i S | i S e S | a

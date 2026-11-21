@@ -1,0 +1,9 @@
+data[0] = 1
+data[1] = 2
+data[2] = 3
+data[3] = 5
+data[4] = 7
+data[5] = 9
+sum = 27
+alan false
+11

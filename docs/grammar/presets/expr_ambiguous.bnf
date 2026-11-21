@@ -1,0 +1,4 @@
+# title: Ambiguous expressions + precedence declarations
+# demonstrates: ambiguity; 4 SLR(1) shift/reduce conflicts resolved by declared precedence/associativity
+# lab precedence declaration for this preset (lowest first):  left +   |   left *
+E -> E + E | E * E | ( E ) | id

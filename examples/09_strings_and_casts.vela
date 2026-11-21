@@ -1,0 +1,29 @@
+// 09_strings_and_casts.vela - string +, explicit casts, integer division rules, short-circuit and/or/not
+func is_positive(n: int): bool {
+    show "checking ", n;
+    return n > 0;
+}
+
+func main() {
+    let first: string = "Vela";
+    let second: string = " compiler";
+    let both: string = first + second;
+    show both;
+
+    let code: int = 'A' as int;
+    let next: char = (code + 1) as char;
+    show code, " ", next;
+
+    let pi: float = 3.99;
+    show pi as int;
+    show 7 / 2, " ", 7 % 2, " ", -7 / 2, " ", -7 % 2;
+    show 7 as float / 2 as float;
+
+    if (is_positive(-1) and is_positive(5)) {
+        show "both";
+    } else {
+        show "not both";
+    }
+    show "n=" + 5 as string;
+    show not (1 > 2) and true;
+}

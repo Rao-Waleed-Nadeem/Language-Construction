@@ -1,0 +1,6 @@
+global level = 1
+block level = 2
+inner level = 3
+block level again = 2
+global again = 1
+after two bumps = 3

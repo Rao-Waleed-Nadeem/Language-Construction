@@ -1,0 +1,4 @@
+# title: Left factoring (if-then-else shape)
+# demonstrates: common-prefix extraction; the factored grammar is still NOT LL(1) (dangling else)
+S -> i E t S | i E t S e S | a
+E -> b

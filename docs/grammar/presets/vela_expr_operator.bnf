@@ -1,0 +1,16 @@
+# title: Vela expressions in operator-grammar form (educational)
+# demonstrates: operator precedence parsing (no epsilon, no adjacent nonterminals).
+# NOTE: unary minus is the separate terminal 'neg'. With a shared '-' token the precedence
+# relations conflict (both < and >), which is why operator-precedence parsing cannot
+# separate unary from binary minus. This preset is an educational form of the real grammar,
+# not the grammar used by the compiler.
+E -> E or A | A
+A -> A and N | N
+N -> not N | Q
+Q -> Q == R | Q != R | R
+R -> R < S | R <= S | R > S | R >= S | S
+S -> S + T | S - T | T
+T -> T * U | T / U | T % U | U
+U -> neg U | V
+V -> V as int | V as float | V as char | V as string | V as bool | P
+P -> ( E ) | id | num

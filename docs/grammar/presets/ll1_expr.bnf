@@ -1,0 +1,8 @@
+# title: LL(1) expressions (after left recursion elimination)
+# demonstrates: predictive parsing table and stack trace
+# expected: LL(1) ok. Ep and Tp stand for E' and T'
+E  -> T Ep
+Ep -> + T Ep | ε
+T  -> F Tp
+Tp -> * F Tp | ε
+F  -> ( E ) | id

@@ -1,0 +1,102 @@
+# ============================================================================
+# VELA — AUTHORITATIVE GRAMMAR  G   (natural form)
+# ----------------------------------------------------------------------------
+# * Plain BNF. One production group per nonterminal; alternatives separated by |
+#   (a line starting with | continues the previous nonterminal).
+# * Epsilon is written ε.
+# * Terminals are every symbol that never appears on a left-hand side.
+#   Keywords and punctuation are written as their lexeme (let, if, (, ;, ...).
+#   Token classes are written ID, INT_LIT, FLOAT_LIT, CHAR_LIT, STRING_LIT.
+# * This is the "natural" grammar: left-recursive lists/operators, common
+#   prefixes NOT factored.  It is the grammar used for LR(0)/SLR(1)/LALR(1)/
+#   CLR(1) generation and shift-reduce parsing.  vela_ll1.bnf is the
+#   LL(1)-transformed equivalent used by the recursive-descent parser.
+# * Start symbol: Program
+# ============================================================================
+
+# ---- Program structure -----------------------------------------------------
+Program      -> TopList
+TopList      -> TopList TopItem | ε
+TopItem      -> FuncDecl | VarDecl
+
+# ---- Functions -------------------------------------------------------------
+FuncDecl     -> func ID ( ParamsOpt ) RetType Block
+RetType      -> : BaseType | ε
+ParamsOpt    -> ParamList | ε
+ParamList    -> ParamList , Param | Param
+Param        -> ID : BaseType | ID : BaseType [ ]
+
+# ---- Types and declarations -------------------------------------------------
+BaseType     -> int | float | char | string | bool
+VarDecl      -> let ID : BaseType ;
+             | let ID : BaseType = Expr ;
+             | let ID : BaseType [ INT_LIT ] ;
+             | let ID : BaseType [ INT_LIT ] = { ExprListOpt } ;
+ExprListOpt  -> ExprList | ε
+ExprList     -> ExprList , Expr | Expr
+
+# ---- Statements ---------------------------------------------------------------
+Block        -> { StmtList }
+StmtList     -> StmtList Stmt | ε
+Stmt         -> VarDecl
+             | SimpleAssign ;
+             | ID ( ArgsOpt ) ;
+             | IfStmt
+             | SwitchStmt
+             | WhileStmt
+             | DoWhileStmt
+             | ForStmt
+             | return ExprOpt ;
+             | break ;
+             | continue ;
+             | show ExprList ;
+             | read ID IndexOpt ;
+             | Block
+
+SimpleAssign -> ID IndexOpt AssignOp Expr
+             | ID IndexOpt ++
+             | ID IndexOpt --
+IndexOpt     -> [ Expr ] | ε
+AssignOp     -> = | += | -= | *= | /= | %=
+ArgsOpt      -> ExprList | ε
+ExprOpt      -> Expr | ε
+
+# ---- Selection (braces are mandatory => no dangling else in Vela itself) ----
+IfStmt       -> if ( Expr ) Block
+             | if ( Expr ) Block else Block
+             | if ( Expr ) Block else IfStmt
+
+SwitchStmt   -> switch ( Expr ) { CaseList DefaultOpt }
+CaseList     -> CaseList CaseClause | ε
+CaseClause   -> case CaseLabels : StmtList
+CaseLabels   -> CaseLabels , CaseConst | CaseConst
+CaseConst    -> INT_LIT | CHAR_LIT | - INT_LIT
+DefaultOpt   -> default : StmtList | ε
+
+# ---- Loops ---------------------------------------------------------------------
+WhileStmt    -> while ( Expr ) Block
+DoWhileStmt  -> do Block while ( Expr ) ;
+ForStmt      -> for ( ForInit ; ExprOpt ; ForUpdate ) Block
+ForInit      -> let ID : BaseType = Expr | SimpleAssign | ε
+ForUpdate    -> SimpleAssign | ε
+
+# ---- Expressions (precedence: lowest at top) -----------------------------------
+Expr         -> OrExpr
+OrExpr       -> OrExpr or AndExpr | AndExpr
+AndExpr      -> AndExpr and NotExpr | NotExpr
+NotExpr      -> not NotExpr | EqExpr
+EqExpr       -> EqExpr EqOp RelExpr | RelExpr
+EqOp         -> == | !=
+RelExpr      -> RelExpr RelOp AddExpr | AddExpr
+RelOp        -> < | <= | > | >=
+AddExpr      -> AddExpr AddOp MulExpr | MulExpr
+AddOp        -> + | -
+MulExpr      -> MulExpr MulOp UnaryExpr | UnaryExpr
+MulOp        -> * | / | %
+UnaryExpr    -> - UnaryExpr | CastExpr
+CastExpr     -> CastExpr as BaseType | Primary
+Primary      -> INT_LIT | FLOAT_LIT | CHAR_LIT | STRING_LIT | true | false
+             | ( Expr )
+             | ID
+             | ID [ Expr ]
+             | ID ( ArgsOpt )

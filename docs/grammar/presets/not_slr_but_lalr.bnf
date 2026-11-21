@@ -1,0 +1,5 @@
+# title: SLR(1) fails, LALR(1) and CLR(1) succeed
+# demonstrates: why FOLLOW sets are too coarse for SLR; 1 SLR conflict; LALR 10 states; CLR 14 states
+S -> L = R | R
+L -> * R | id
+R -> L

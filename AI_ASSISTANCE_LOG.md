@@ -1,0 +1,7 @@
+# AI Assistance Log
+
+Record of AI-assisted sessions during the implementation of the Vela Compiler and Vela Studio (CS 4031).
+
+| Session # | Date | Tool / Model | Task / Prompt Summary | Files Affected | Member / Role |
+|---|---|---|---|---|---|
+| 1 | 2026-11-21 | Antigravity (Gemini 3.8 Flash) | Run #1: Project initialization, workspace skeleton, environment setup (M0-T1) | `IMPLEMENTATION_STATUS.md`, `DECISION_LOG.md`, `AI_ASSISTANCE_LOG.md`, `CONTRIBUTIONS.md`, `ACKNOWLEDGEMENTS.md`, `backend/`, `frontend/`, `scripts/` | Implementation Agent |

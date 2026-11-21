@@ -1,0 +1,6 @@
+# title: Dangling else resolved by matched/unmatched rewrite
+# demonstrates: grammar transformation removing the ambiguity; SLR(1) conflict-free with 11 LR(0) states
+# M = matched statement (every if has an else), U = unmatched statement
+S -> M | U
+M -> i M e M | a
+U -> i S | i M e U

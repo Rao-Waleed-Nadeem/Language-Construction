@@ -1,0 +1,4 @@
+# title: Indirect left recursion
+# demonstrates: general left recursion elimination (order S, A; substitute then remove immediate recursion)
+S -> A a | b
+A -> A c | S d | ε

@@ -1,0 +1,4 @@
+# title: Balanced parentheses (LR(0))
+# demonstrates: smallest grammar that is conflict-free in LR(0); 6 LR(0) states
+# expected: LR(0) ok, SLR(1) ok, LALR(1) ok, CLR(1) ok
+S -> ( S ) | x

@@ -1,0 +1,110 @@
+{
+  "docs/00_PROJECT_MASTER_SPEC.md": {
+    "mtime": 1795262870.6443975,
+    "seen": 1795263513.4776285,
+    "ast_hash": "a358d61804044722b1cc4b428cb8242d",
+    "semantic_hash": "a358d61804044722b1cc4b428cb8242d"
+  },
+  "docs/01_LANGUAGE_SPECIFICATION.md": {
+    "mtime": 1795262396.7266917,
+    "seen": 1795263513.4776285,
+    "ast_hash": "28e3453d6f1f18987362fc5595be94e5",
+    "semantic_hash": "28e3453d6f1f18987362fc5595be94e5"
+  },
+  "docs/02_COMPILER_ARCHITECTURE.md": {
+    "mtime": 1795262396.7468343,
+    "seen": 1795263513.4776285,
+    "ast_hash": "4112512cf7cf04d0cf877f360d0d4d90",
+    "semantic_hash": "4112512cf7cf04d0cf877f360d0d4d90"
+  },
+  "docs/03_UI_UX_SPECIFICATION.md": {
+    "mtime": 1795262396.7568815,
+    "seen": 1795263513.4776285,
+    "ast_hash": "4c1de13acc29d62ebf69a05b16ef2454",
+    "semantic_hash": "4c1de13acc29d62ebf69a05b16ef2454"
+  },
+  "docs/README.md": {
+    "mtime": 1795262396.7646549,
+    "seen": 1795263513.4776285,
+    "ast_hash": "6c03fc6da7a5e9e2f0392b8d0f81170b",
+    "semantic_hash": "6c03fc6da7a5e9e2f0392b8d0f81170b"
+  },
+  "docs/Semester Project.md": {
+    "mtime": 1795262844.7784712,
+    "seen": 1795263513.4776285,
+    "ast_hash": "3c03931b97dd15c0cf09ee91e091e9c7",
+    "semantic_hash": "3c03931b97dd15c0cf09ee91e091e9c7"
+  },
+  "examples/01_hello_types.expected.txt": {
+    "mtime": 1795262396.8708115,
+    "seen": 1795263513.4776285,
+    "ast_hash": "9b81488bf6f5041c52ab9bf2aa0605b7",
+    "semantic_hash": "9b81488bf6f5041c52ab9bf2aa0605b7"
+  },
+  "examples/02_conditions.expected.txt": {
+    "mtime": 1795262396.8887568,
+    "seen": 1795263513.4776285,
+    "ast_hash": "16872a8936cc275f4fea3f622d8e2b3d",
+    "semantic_hash": "16872a8936cc275f4fea3f622d8e2b3d"
+  },
+  "examples/03_switch.expected.txt": {
+    "mtime": 1795262396.905244,
+    "seen": 1795263513.4776285,
+    "ast_hash": "0d38012536549e361c88f5ec10811ec0",
+    "semantic_hash": "0d38012536549e361c88f5ec10811ec0"
+  },
+  "examples/04_loops.expected.txt": {
+    "mtime": 1795262396.9180322,
+    "seen": 1795263513.4776285,
+    "ast_hash": "630fe4b335472fb47e4bfbb099fcbf79",
+    "semantic_hash": "630fe4b335472fb47e4bfbb099fcbf79"
+  },
+  "examples/05_functions.expected.txt": {
+    "mtime": 1795262396.9308145,
+    "seen": 1795263513.4776285,
+    "ast_hash": "d843610db058cde94b80e4977bfbe957",
+    "semantic_hash": "d843610db058cde94b80e4977bfbe957"
+  },
+  "examples/06_arrays.expected.txt": {
+    "mtime": 1795262396.945821,
+    "seen": 1795263513.4776285,
+    "ast_hash": "b1f0e268cbbbcaf8486e3c336c0093b7",
+    "semantic_hash": "b1f0e268cbbbcaf8486e3c336c0093b7"
+  },
+  "examples/07_io.expected.txt": {
+    "mtime": 1795262396.95962,
+    "seen": 1795263513.4776285,
+    "ast_hash": "ffa28cd7493ef588fc3f084626f0ad25",
+    "semantic_hash": "ffa28cd7493ef588fc3f084626f0ad25"
+  },
+  "examples/07_io.stdin.txt": {
+    "mtime": 1795262396.9670978,
+    "seen": 1795263513.4776285,
+    "ast_hash": "3073b0d6f2399547b4d7028f58d0e555",
+    "semantic_hash": "3073b0d6f2399547b4d7028f58d0e555"
+  },
+  "examples/08_optimizer_showcase.expected.txt": {
+    "mtime": 1795262396.981558,
+    "seen": 1795263513.4776285,
+    "ast_hash": "61fbcfdcd58fe9791f9ec8beb8c140ac",
+    "semantic_hash": "61fbcfdcd58fe9791f9ec8beb8c140ac"
+  },
+  "examples/08_optimizer_showcase.stdin.txt": {
+    "mtime": 1795262396.9898424,
+    "seen": 1795263513.4776285,
+    "ast_hash": "ebe0df4fd7168a864e676aa71a652e13",
+    "semantic_hash": "ebe0df4fd7168a864e676aa71a652e13"
+  },
+  "examples/09_strings_and_casts.expected.txt": {
+    "mtime": 1795262397.0033064,
+    "seen": 1795263513.4776285,
+    "ast_hash": "bf07dcd3b03d534c0508f9377e4386a9",
+    "semantic_hash": "bf07dcd3b03d534c0508f9377e4386a9"
+  },
+  "examples/10_scopes.expected.txt": {
+    "mtime": 1795262397.018978,
+    "seen": 1795263513.4776285,
+    "ast_hash": "250fec4e143fa38ae9282dfe632e9589",
+    "semantic_hash": "250fec4e143fa38ae9282dfe632e9589"
+  }
+}

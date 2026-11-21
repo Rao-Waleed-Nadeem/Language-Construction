@@ -1,0 +1,14 @@
+// 01_hello_types.vela - declarations, the five data types, show, implicit int -> float
+let greeting: string = "Hello, Vela!";
+let answer: int = 42;
+
+func main() {
+    let ratio: float = 2.5;
+    let grade: char = 'A';
+    let ready: bool = true;
+    let total: float = answer + ratio;   // int is widened to float
+    show greeting;
+    show "answer=", answer, " ratio=", ratio;
+    show "grade=", grade, " ready=", ready;
+    show "total=", total;
+}

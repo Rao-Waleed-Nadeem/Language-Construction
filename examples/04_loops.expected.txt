@@ -1,0 +1,6 @@
+sum 1..5 = 15
+collatz steps = 6
+k=3
+k=9
+k=12
+first j with j*j>50: 8

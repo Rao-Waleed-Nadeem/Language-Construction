@@ -1,0 +1,36 @@
+// 03_switch.vela - switch/case/default, several labels per case, break, char switch
+// Vela has NO fall-through: a case body ends the switch when it finishes.
+func describe(code: int): string {
+    let label: string = "";
+    switch (code) {
+        case 1:
+            label = "one";
+        case 2, 3:
+            label = "two-or-three";
+            if (code == 3) {
+                label = "three";
+                break;
+            }
+            label = label + "!";
+        default:
+            label = "other";
+    }
+    return label;
+}
+
+func is_vowel(c: char): bool {
+    switch (c) {
+        case 'a', 'e', 'i', 'o', 'u':
+            return true;
+        default:
+            return false;
+    }
+}
+
+func main() {
+    show describe(1);
+    show describe(2);
+    show describe(3);
+    show describe(9);
+    show is_vowel('e'), " ", is_vowel('z');
+}

@@ -1,0 +1,34 @@
+// 06_arrays.vela - array declaration, initializer, default fill, indexing, array parameters (by reference)
+func sum(values: int[], count: int): int {
+    let total: int = 0;
+    for (let i: int = 0; i < count; i++) {
+        total += values[i];
+    }
+    return total;
+}
+
+func sort(values: int[], count: int) {
+    for (let i: int = 0; i < count - 1; i++) {
+        for (let j: int = 0; j < count - 1 - i; j++) {
+            if (values[j] > values[j + 1]) {
+                let tmp: int = values[j];
+                values[j] = values[j + 1];
+                values[j + 1] = tmp;
+            }
+        }
+    }
+}
+
+func main() {
+    let data: int[6] = {5, 3, 9, 1, 7, 2};
+    let names: string[2] = {"ada", "alan"};
+    let flags: bool[3];
+    sort(data, 6);
+    for (let i: int = 0; i < 6; i++) {
+        show "data[", i, "] = ", data[i];
+    }
+    show "sum = ", sum(data, 6);
+    show names[1], " ", flags[0];
+    data[0] += 10;
+    show data[0];
+}

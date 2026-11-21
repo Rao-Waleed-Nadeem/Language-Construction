@@ -1,0 +1,23 @@
+// 10_scopes.vela - global variable, nested block scopes, shadowing, functions declared after use
+let level: int = 1;
+
+func main() {
+    show "global level = ", level;
+    {
+        let level: int = 2;
+        show "block level = ", level;
+        {
+            let level: int = 3;
+            show "inner level = ", level;
+        }
+        show "block level again = ", level;
+    }
+    show "global again = ", level;
+    bump();
+    bump();
+    show "after two bumps = ", level;
+}
+
+func bump() {
+    level += 1;
+}

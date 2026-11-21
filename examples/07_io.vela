@@ -1,0 +1,22 @@
+// 07_io.vela - read into variables of different types, switch on a char
+// stdin for the expected output:  4 7 * ada
+func main() {
+    let a: int;
+    let b: int;
+    let op: char;
+    let name: string;
+    read a;
+    read b;
+    read op;
+    read name;
+    show "a=", a, " b=", b;
+    switch (op) {
+        case '+':
+            show a + b;
+        case '*':
+            show a * b;
+        default:
+            show "unsupported operator";
+    }
+    show "hi ", name;
+}

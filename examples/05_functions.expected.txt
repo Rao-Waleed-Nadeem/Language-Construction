@@ -1,0 +1,5 @@
+== functions ==
+5! = 120
+fib(10) = 55
+2.5^3 = 15.625
+true false
