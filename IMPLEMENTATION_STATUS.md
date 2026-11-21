@@ -7,7 +7,7 @@ Last updated: 2026-11-21   Run #: 1
 | M0-T1 | Skeleton and tooling | DONE | `powershell -File .\scripts\test.ps1` → 2 passed, ruff clean, tsc clean; `npm run build` → exit 0; pure import OK | 2026-11-21 | Workspace, backend venv, frontend, scripts |
 | M0-T2 | Common foundations | DONE | `powershell -File .\scripts\test.ps1` → 8 passed; covers normalization, line/col conversion, all 47 diagnostic codes | 2026-11-21 | SourceFile, Span, Diagnostic, Limits, Budget |
 | M1-T1 | Language tables | DONE | `powershell -File .\scripts\test.ps1` → 15 passed; asserts exactly 26 keywords, operators, delimiters, precedence, regexes | 2026-11-21 | spec.py single source of truth |
-| M1-T2 | DFA, buffer, scanner | TODO | | | |
+| M1-T2 | DFA, buffer, scanner | DONE | `powershell -File .\scripts\test.ps1` → 27 passed; verifies all token classes, longest match, buffer refill, INV-LEX-01..07, 10/10 examples | 2026-11-21 | DFA-driven scanner, InputBuffer, maximal munch |
 | M2-T1 | Model, loader, analysis | TODO | | | |
 | M2-T2 | Transformations | TODO | | | |
 | M2-T3 | LL(1) tools | TODO | | | |
@@ -50,6 +50,15 @@ Last updated: 2026-11-21   Run #: 1
 | P1-02 | Identify keywords, identifiers, literals, operators | SATISFIED | `vela.language.spec` tables and unit tests |
 | P1-05 | Operator precedence and associativity | SATISFIED | `test_precedence_table` 8 levels verified |
 | P2-01 | Regular expressions for tokens | SATISFIED | `test_token_regexes` in `test_language_spec.py` |
+| LD-03 | Identifiers and naming conventions | SATISFIED | `IdentifierDFA`, 64-char limit check, `test_scanner.py` |
+| LD-14 | Comments and delimiters | SATISFIED | Line comments `//`, block comments `/*...*/`, delimiters verified |
+| P2-02 | Finite state machines for token recognition | SATISFIED | `fsm.py` explicit DFAs and simulation path traces |
+| P2-03 | Identify tokens and lexemes | SATISFIED | `Token` class and `Scanner.scan()` in `tokens.py`/`scanner.py` |
+| P2-04 | Recognize keywords, identifiers, operators, literals | SATISFIED | `test_token_classes_and_literals` in `test_scanner.py` |
+| P2-05 | Implement input buffering | SATISFIED | `InputBuffer` two-buffer scheme with sentinels and refill trace |
+| P2-06 | Handle lexical errors | SATISFIED | `test_inv_lex_01` through `07` assert exact codes/positions |
+| P2-07 | Output keyword (show) recognized as reserved token | SATISFIED | `test_keyword_vs_identifier` asserts show=KEYWORD, shown=ID |
+| P2-08 | Scanner implemented manually with explicit DFAs | SATISFIED | Hand-written `Scanner` with `NumberDFA`, `IdentifierDFA`, `OperatorDFA` |
 
 ## Known limitations
 None yet.
@@ -61,4 +70,5 @@ None.
 - **Run #1 (2026-11-21):**
   - M0-T1: Workspace skeleton and tooling complete.
   - M0-T2: Common foundations complete (`vela.common.source`, `diagnostics`, `limits`, `budget`). 8 unit tests passing. Milestone M0 complete.
-  - M1-T1: Language tables complete (`vela.language.spec`). 15 unit tests passing. Next: M1-T2.
+  - M1-T1: Language tables complete (`vela.language.spec`). 15 unit tests passing.
+  - M1-T2: Scanner, buffer, DFA simulator complete (`vela.lexer.tokens`, `buffer`, `fsm`, `scanner`). 27 tests passing. Milestone M1 complete. Next: M2-T1.

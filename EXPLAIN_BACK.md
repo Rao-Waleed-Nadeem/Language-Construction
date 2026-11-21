@@ -23,3 +23,27 @@ Consolidated architectural summaries and viva preparation material for each comp
    **A:** `backend/vela/` is completely decoupled from FastAPI, Uvicorn, and HTTP concerns. The FastAPI application in `backend/api/` is an external adapter that imports `vela`, but `vela` never imports `api` or `fastapi`. This is tested automatically in `backend/tests/test_smoke.py`.
 3. **Q: What is the purpose of cooperative resource budgets instead of killing threads?**
    **A:** Killing threads in Python or WebAssembly runtimes leaves shared memory, locks, and file descriptors in corrupt states. Cooperative budgets check iteration counts at clean yield points, allowing graceful fail-soft termination and reporting informative errors (`VL-RUN-007` or `VL-LIM-001`) with all prior phase results intact.
+
+---
+
+## Milestone M1 — Lexical Analysis (Phase 2)
+
+### What the modules do
+- **`vela.language.spec`**: Central repository for all language tables. Defines 26 reserved keywords, 19 operators, 9 delimiters, 8-level precedence table, and token regular expressions. Acts as the single source of truth for the lexer, `/api/language`, and code editor highlighting.
+- **`vela.lexer.tokens` (`Token`, `LexResult`)**: Defines standardized token records holding `category`, `symbol`, `lexeme`, evaluated `value`, and source `span`. Packages tokens, diagnostics, DFA step traces, and buffer refill events.
+- **`vela.lexer.buffer` (`InputBuffer`)**: Implements the classic Dragon Book two-buffer input scheme with sentinels (`\0`), configurable chunk sizes, `lexeme_begin` / `forward` pointers, retract capabilities, and refill event telemetry.
+- **`vela.lexer.fsm` (`DFA`, `DFASimulator`)**: Explicit deterministic finite automata for numbers, identifiers, and multi-character operators with maximal munch (longest match) simulation and step-by-step transition tracking for UI visualization.
+- **`vela.lexer.scanner` (`Scanner`)**: Hand-written lexical analyzer. Scans tokens, strips whitespace and comments (`//` and `/*...*/`), disambiguates keywords vs identifiers (e.g. `show` vs `shown`), evaluates literal values, and gathers all lexical errors (`VL-LEX-001...011`, `VL-LIM-001`) without early abortion.
+
+### Key Algorithms & Data Structures
+1. **Two-Buffer Scheme with Sentinels**: Input is loaded in alternating chunks into buffers $B_1$ and $B_2$ with sentinel characters at the end. Only two pointer comparisons per character are needed instead of end-of-buffer checks on every character advance.
+2. **Maximal Munch (Longest Match)**: In token recognition (e.g., `<` vs `<=`, `+` vs `++` vs `+=`), the DFA simulator continues advancing while transitions exist, remembering the last accepted state. When no further transition is possible, it retracts the buffer pointer to the longest recognized match.
+3. **Keyword Disambiguation**: Identifiers recognized by the identifier DFA are checked against a hash set of 26 reserved words in $O(1)$ time. If matched, the token category is classified as `KEYWORD` (or logical `OPERATOR`) and the symbol is set to the lexeme.
+
+### Viva Questions & Answers
+1. **Q: Why is input buffering using two buffers and sentinels necessary?**
+   **A:** Reading large files character-by-character from disk or string memory is inefficient and makes lookahead/retract operations complex. The two-buffer scheme with sentinels permits seamless lookahead across buffer boundaries and reduces boundary checking to a single sentinel character test per iteration.
+2. **Q: How does the lexer resolve the ambiguity between `<` and `<=` or `=` and `==`?**
+   **A:** The lexer uses the longest-match (maximal munch) rule implemented in `OperatorDFA`. When seeing `=`, it does not immediately commit; it checks if the next character is `=`. If so, it transitions to state `EQ` (`==`). Only when no further valid transition exists does it accept the longest match.
+3. **Q: How are lexical errors recovered from, and why is recovery important?**
+   **A:** The scanner uses panic-mode/character-skip recovery: on an invalid character (`VL-LEX-001`), it emits a diagnostic with the exact span, skips the invalid character, and resumes scanning the next token. This ensures all lexical errors in a file are reported in a single compiler run rather than halting on the very first typo.
