@@ -72,6 +72,11 @@ class Span:
         return {"start": self.start.to_dict(), "end": self.end.to_dict()}
 
     @classmethod
+    def zero(cls) -> Span:
+        loc = SourceLocation(1, 1, 0)
+        return cls(loc, loc)
+
+    @classmethod
     def from_dict(cls, data: dict[str, dict[str, int]]) -> Span:
         return cls(
             start=SourceLocation.from_dict(data["start"]),

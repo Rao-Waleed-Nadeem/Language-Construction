@@ -18,7 +18,7 @@ Last updated: 2026-11-21   Run #: 1
 | M4-T2 | Checker | DONE | `powershell -File .\scripts\test.ps1` → 98 passed; verifies INV-SEM-01..19 exact codes/positions, all 10 examples pass cleanly, conversion table, implicit casts | 2026-11-21 | SemanticChecker in checker.py |
 | M4-T3 | SDD/SDT engine | DONE | `powershell -File .\scripts\test.ps1` → 104 passed; verifies S-attributed & L-attributed classification, safe evaluator, cycle detection, right-sibling dependency detection, 4 presets | 2026-11-21 | SDDEngine, SafeSDDEvaluator, classifier, presets |
 | M4-T4 | Expression DAG | DONE | `powershell -File .\scripts\test.ps1` → 111 passed; verifies value numbering, commutativity normalization, basic block def-kill, node counts, and (a+b)*2 & (a+b)*3 sharing | 2026-11-21 | DAG, DAGBuilder, value numbering, test_dag.py |
-| M5-T1 | TAC model and generator | TODO | | | |
+| M5-T1 | TAC model and generator | DONE | `powershell -File .\scripts\test.ps1` → 120 passed; verifies golden TAC for all constructs (declarations, arithmetic, if/else, switch, loops, break/continue, calls, arrays, casts, show/read), short-circuit boolean lowering, all jump labels exist, all 10 examples compile | 2026-11-21 | TACProgram, TACGenerator, TACPrinter, test_tac_generator.py |
 | M5-T2 | TAC interpreter (oracle) | TODO | | | |
 | M6-T1 | Blocks, CFG, dominators, loops | TODO | | | |
 | M6-T2 | Data-flow framework | TODO | | | |
@@ -87,6 +87,17 @@ Last updated: 2026-11-21   Run #: 1
 | P4-07 | Syntax-Directed Definitions (SDD) | SATISFIED | S-attributed and L-attributed classification, dependency graph, topological evaluation, 4 presets |
 | P4-08 | Syntax-Directed Translation (SDT) | SATISFIED | SDD/SDT execution engine with cycle detection and safe evaluator |
 | P4-09 | Directed Acyclic Graphs (DAGs) for expressions | SATISFIED | Expression DAG with value numbering, commutativity normalization, build trace, node savings |
+| P5-01 | Intermediate code generator producing Three-Address Code | SATISFIED | `ir/generator.py`, `tac.py`, `printer.py` generating well-formed quadruples |
+| P5-02 | Variable declarations | SATISFIED | Global startup and local variable initializers lowered to `ASSIGN` and `ARRAY_SET` |
+| P5-03 | Arithmetic expressions | SATISFIED | `ADD`, `SUB`, `MUL`, `DIV`, `MOD`, `NEG` with temporaries and widening |
+| P5-04 | IF-ELSE statements | SATISFIED | Conditional branches (`JUMP_IF_FALSE`, `JUMP`) and labels |
+| P5-05 | Nested conditions | SATISFIED | Nested if/else branch lowering and label validation |
+| P5-06 | SWITCH-CASE statements | SATISFIED | Compare chain on cases, jumps to bodies, default handling, break to exit |
+| P5-07 | FOR loops | SATISFIED | Header initialization, condition check, update label target for continue |
+| P5-08 | WHILE loops | SATISFIED | Condition label, conditional jump, exit label, break/continue targets |
+| P5-09 | DO-WHILE loops | SATISFIED | Body start label, condition check at bottom, conditional loop jump |
+| P5-10 | Function definitions and calls | SATISFIED | `FUNC_BEGIN`, `PARAM`, `CALL`, `RETURN`, `FUNC_END` calling convention |
+| P5-11 | Array operations | SATISFIED | `ARRAY_GET` and `ARRAY_SET` index operations |
 
 ## Known limitations
 None yet.
@@ -109,4 +120,5 @@ None.
   - M4-T1: Types, symbols, scopes, return-path analysis complete (`vela.semantic.types`, `symbols`, `returns`). 76 tests passing.
   - M4-T2: Checker complete (`vela.semantic.checker`). 98 tests passing.
   - M4-T3: SDD/SDT engine complete (`vela.semantic.sdd`). 104 tests passing.
-  - M4-T4: Expression DAG complete (`vela.ast.dag`). 111 tests passing. Milestone M4 complete! Next: M5-T1.
+  - M4-T4: Expression DAG complete (`vela.ast.dag`). 111 tests passing. Milestone M4 complete!
+  - M5-T1: TAC model and generator complete (`vela.ir.tac`, `generator`, `printer`). 120 tests passing. Next: M5-T2.
