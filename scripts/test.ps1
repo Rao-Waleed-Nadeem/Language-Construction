@@ -26,15 +26,26 @@ if ($ruffExit -ne 0) {
     exit $ruffExit
 }
 
-Write-Host "==> Running frontend type check..."
+Write-Host "==> Running frontend tests (vitest)..."
 Push-Location "frontend"
-npx tsc --noEmit
-$tscExit = $LASTEXITCODE
+npm test -- --run
+$vitestExit = $LASTEXITCODE
 Pop-Location
 
-if ($tscExit -ne 0) {
-    Write-Error "Frontend typecheck failed with exit code $tscExit"
-    exit $tscExit
+if ($vitestExit -ne 0) {
+    Write-Error "Frontend tests failed with exit code $vitestExit"
+    exit $vitestExit
 }
 
-Write-Host "==> All tests and checks passed!"
+Write-Host "==> Running frontend type check & production build..."
+Push-Location "frontend"
+npm run build
+$buildExit = $LASTEXITCODE
+Pop-Location
+
+if ($buildExit -ne 0) {
+    Write-Error "Frontend build failed with exit code $buildExit"
+    exit $buildExit
+}
+
+Write-Host "==> All tests, checks, and builds passed successfully!"
