@@ -76,3 +76,28 @@ Consolidated architectural summaries and viva preparation material for each comp
    **A:** Merging two CLR(1) states with identical cores combines their lookaheads. If two different productions $A \to \alpha$ and $B \to \alpha$ had disjoint lookaheads $\{a\}$ and $\{b\}$ in separate states, merging the states can cause both reductions to be valid on the union of lookaheads, creating a reduce/reduce conflict (as demonstrated in `not_lalr_but_clr.bnf`).
 3. **Q: Why does operator-precedence parsing fail when unary and binary minus share the same `-` token?**
    **A:** In operator grammars, relations ($\lessdot, \gtrdot$) are strictly binary relations between pairs of terminals. Binary minus needs lower precedence than multiplication ($+ \lessdot *$), but unary minus needs higher precedence ($* \lessdot -$). When both use `-`, both relations hold simultaneously ($- \lessdot -$ and $- \gtrdot -$), resulting in an unresolvable relation conflict. Vela's Grammar Lab demonstrates this with `vela_expr_operator.bnf`.
+
+
+---
+
+## Milestone M3 — Parser and AST (Phase 3 Production & Phase 4 AST)
+
+### What the modules do
+- **`vela.ast.nodes`**: Comprehensive AST node hierarchy for all Vela constructs: `Program`, `VarDecl`, `FuncDecl`, `Param`, `Block`, statements (`AssignStmt`, `CallStmt`, `IfStmt`, `SwitchStmt`, `CaseClause`, `WhileStmt`, `DoWhileStmt`, `ForStmt`, `ReturnStmt`, `BreakStmt`, `ContinueStmt`, `ShowStmt`, `ReadStmt`), and expressions (`BinaryExpr`, `UnaryExpr`, `CastExpr`, `ImplicitCast`, `LiteralExpr`, `VarRefExpr`, `ArrayAccessExpr`, `CallExpr`). Every node carries a unique integer `id` and a source `Span`.
+- **`vela.ast.printer` (`ASTPrinter`)**: Formats AST hierarchies into human-readable S-expressions (Lisp-style) and structured JSON dictionaries for visualization in the Vela Studio Trees page.
+- **`vela.parser.parse_tree` (`ParseTreeNode`, `ParseTree`)**: Concrete Syntax Tree (CST) data structures representing exact grammar derivations according to $G'$ (`vela_ll1.bnf`), including nonterminal branches, matched terminal leaves, $\varepsilon$-derivations, and hierarchical spans.
+- **`vela.parser.recovery` (`PanicModeRecovery`)**: Provides synchronizing token sets (`STATEMENT_STARTERS`, `DECLARATION_STARTERS`, `STATEMENT_SYNCHRONIZERS`) and recovery routines to safely resynchronize the parser on statement and declaration boundaries without cascading errors or infinite loops.
+- **`vela.parser.recursive_descent` (`RecursiveDescentParser`, `parse_source`)**: Hand-written LL(1) recursive descent parser. Emits execution call traces, enforces the nesting depth limit of 200 (`VL-SYN-003`), builds AST and CST simultaneously, and reports exact diagnostics (`VL-SYN-001`, `VL-SYN-002`).
+
+### Key Algorithms & Data Structures
+1. **Precedence Ladder with Iterative Loops**: Left-associative binary operators ($E \to T E'$; $E' \to + T E' \mid \varepsilon$) are parsed using iterative `while` loops instead of recursive method calls. This eliminates stack frame overhead while building properly left-branching AST structures (`BinaryExpr(BinaryExpr(a, +, b), +, c)`).
+2. **Simultaneous AST and CST Construction**: As the recursive descent parser descends grammar productions, it maintains a CST parent stack. When terminal tokens are consumed or nonterminals exit, CST nodes are attached and spans aggregated. At the same time, semantic AST nodes are instantiated and returned up the call stack.
+3. **Panic-Mode Synchronization**: On encountering unexpected tokens, the parser records a diagnostic (`VL-SYN-001` or `VL-SYN-002`) and skips tokens until reaching a synchronizing token (`;`, `}`, or statement/declaration starter), guaranteeing forward progress and discovering multiple errors in a single run (as verified on `INV-SYN-08`).
+
+### Viva Questions & Answers
+1. **Q: Why does Vela use recursive descent for production parsing instead of table-driven LR parsing?**
+   **A:** Recursive descent produces superior, human-readable error messages and enables surgical panic-mode recovery tailored to specific statement constructs (e.g. knowing whether a missing token was in an `if` header, a `for` loop, or a variable declaration). It also constructs rich, custom AST nodes directly without requiring complex reduction actions inside table drivers.
+2. **Q: How does the parser prevent stack overflow on adversarial inputs like 250 nested parentheses?**
+   **A:** The parser tracks `self.nesting_depth` upon entering each nonterminal or expression level. When `nesting_depth > 200`, it immediately emits diagnostic `VL-SYN-003` at the offending token and raises `NestingLimitExceededError`, safely unwinding the stack and returning a fail-soft `ParseResult`.
+3. **Q: How was the recursive-descent parser differentially validated against the LR family?**
+   **A:** Using differential testing: the token streams of all valid example programs, invalid syntax error programs, and dozens of mutated sentences were fed into both the recursive-descent parser (operating on $G'$) and the SLR(1) shift-reduce table parser (operating on $G$). Both parsers agreed 100% on accept/reject decisions across all test cases.

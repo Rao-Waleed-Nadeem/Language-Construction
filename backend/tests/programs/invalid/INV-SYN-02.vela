@@ -1,0 +1,5 @@
+func main() { // INV-SYN-02
+    if (1 < 2 {
+        show 1;
+    }
+}

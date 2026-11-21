@@ -1,0 +1,5 @@
+func main() { // INV-SYN-06
+    for (let i: int = 0; i < 3 i++) {
+        show i;
+    }
+}

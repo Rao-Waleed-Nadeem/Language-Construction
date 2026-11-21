@@ -1,0 +1,4 @@
+func main() { // INV-SYN-04
+    let x: int = 1;
+    if (x > 0) show x;
+}

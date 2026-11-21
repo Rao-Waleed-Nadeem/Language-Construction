@@ -1,0 +1,2 @@
+func main() { // INV-SYN-05
+    show 1;

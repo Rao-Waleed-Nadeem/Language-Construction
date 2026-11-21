@@ -1,0 +1,5 @@
+func main() { // INV-SYN-08
+    let a: int = ;
+    let b: int = 2
+    show a;
+}

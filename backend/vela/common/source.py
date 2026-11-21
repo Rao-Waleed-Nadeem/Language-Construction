@@ -28,6 +28,22 @@ class SourceLocation:
     col: int
     offset: int
 
+    @property
+    def column(self) -> int:
+        return self.col
+
+    def __lt__(self, other: SourceLocation) -> bool:
+        return self.offset < other.offset
+
+    def __le__(self, other: SourceLocation) -> bool:
+        return self.offset <= other.offset
+
+    def __gt__(self, other: SourceLocation) -> bool:
+        return self.offset > other.offset
+
+    def __ge__(self, other: SourceLocation) -> bool:
+        return self.offset >= other.offset
+
     def __str__(self) -> str:
         return f"{self.line}:{self.col}"
 

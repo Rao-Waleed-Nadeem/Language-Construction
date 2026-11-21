@@ -1,0 +1,3 @@
+func main() { // INV-SYN-07
+    let x = 5;
+}
