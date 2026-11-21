@@ -10,6 +10,6 @@ export { SemanticPage } from './SemanticPage';
 export { TreesPage } from './TreesPage';
 export { IRPage } from './IRPage';
 export { OptimizerPage } from './OptimizerPage';
-export const CodeGenPage: React.FC = () => <EmptyState title="Target CodeGen" description="Target ISA & register allocation" />;
-export const VMPage: React.FC = () => <EmptyState title="Virtual Machine" description="Execution simulator & state inspection" />;
+export { CodeGenPage } from './CodeGenPage';
+export { VMPage } from './VMPage';
 export const ReferencePage: React.FC = () => <EmptyState title="Reference" description="Language manual & error catalogue" />;
