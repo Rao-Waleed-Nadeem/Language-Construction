@@ -26,3 +26,14 @@ class Limits:
 
 
 LIMITS = Limits()
+
+INT32_MIN = -2147483648
+INT32_MAX = 2147483647
+
+
+def wrap32(n: int) -> int:
+    """Simulate 32-bit two's complement signed integer wrap-around."""
+    n = n & 0xFFFFFFFF
+    if n >= 0x80000000:
+        n -= 0x100000000
+    return n

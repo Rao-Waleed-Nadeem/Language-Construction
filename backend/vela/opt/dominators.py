@@ -126,6 +126,8 @@ def compute_dominators(cfg: ControlFlowGraph) -> DominatorInfo:
     # A back edge is a CFG edge a -> b where b dominates a (b in DOM(a))
     back_edges: list[tuple[int, int]] = []
     for edge in cfg.edges:
+        if edge.kind == "call":
+            continue
         src, tgt = edge.source, edge.target
         if tgt != cfg.exit_id and src in all_blocks and tgt in all_blocks and info.dominates(tgt, src):
             back_edges.append((src, tgt))

@@ -154,3 +154,52 @@ Milestone M5 delivers the intermediate representation and reference execution la
    **A:** The TAC interpreter executes the machine-independent IR before any optimizations or machine-specific transformations take place. By verifying that the unoptimized TAC produces 100% identical outputs to the target VM (and matching all golden `.expected.txt` files), the compiler architecture ensures that any discrepancy observed in later phases (Phase 6 optimization or Phase 7 code generation) is immediately identifiable as an optimization or codegen bug rather than a language semantics bug.
 3. **Q: How does Vela handle array memory and parameters during TAC execution?**
    **A:** In Vela, arrays are fixed-size buffers allocated on the heap or frame via `ALLOC_ARRAY`. Array parameters are passed by reference (`name: int[]`). In the interpreter, passing an array passes the reference to the underlying Python list object, allowing in-place mutations (e.g. in sorting or accumulation routines) to affect the caller's array directly, fulfilling the by-reference requirement without pointer arithmetic.
+
+---
+
+## Milestone M6 — Code Optimization and Data-Flow Framework
+
+### Overview
+Milestone M6 delivers the complete Phase 6 optimization subsystem for Three-Address Code:
+- **Basic Block Partitioning (`vela.opt.blocks`)**: Implements Dragon Book Algorithm 8.5 with explicit provenance tracking for leader identification (`first instruction`, `jump target: L`, `follows jump/branch/return`).
+- **Control-Flow Graph (`vela.opt.cfg`)**: Constructs directed control-flow graphs connecting basic blocks with typed edges (`entry`, `fall_through`, `branch`, `jump`, `call`, `return`). Supports interactive GUI export via Mermaid diagrams and JSON schemas.
+- **Dominator Analysis & Natural Loops (`vela.opt.dominators`)**: Solves iterative dominator equations $DOM(n) = \{n\} \cup \left(\bigcap_{p \in Pred(n)} DOM(p)\right)$, extracts immediate dominators ($idom$), constructs the dominator tree, identifies back-edges ($n \to d$ where $d \text{ dom } n$), and reconstructs the natural loop body for each loop header.
+- **Generic Data-Flow Analysis Framework (`vela.opt.dataflow`)**: A unified iterative worklist engine supporting forward/backward directions and union/intersection meet operators with step-by-step iteration logging:
+  - *Reaching Definitions* (Forward, Union)
+  - *Live Variables* (Backward, Union)
+  - *Available Expressions* (Forward, Intersection)
+  - *Available Copies* (Forward, Intersection)
+- **Eight Machine-Independent Optimization Passes (`vela.opt.passes.*`)**:
+  - `const_fold`: Folds compile-time arithmetic with 32-bit two's complement wrap-around; explicitly protects $\div 0$ and $\% 0$ from folding to preserve runtime diagnostics.
+  - `simplify`: Eliminates algebraic identities ($x + 0 \to x$, $x * 1 \to x$, $x * 0 \to 0$, $x - 0 \to x$, $x / 1 \to x$).
+  - `const_prop`: Replaces variable uses with constants using local block environment and global reaching definitions.
+  - `copy_prop`: Replaces variable copies $x = y$ with the original source operand.
+  - `cse`: Eliminates redundant computations via local DAG value numbering and global available expressions.
+  - `strength`: Replaces expensive multiplications with additions (e.g. $x * 2 \to x + x$).
+  - `licm`: Hoists loop-invariant computations out of natural loops into preheaders.
+  - `dce`: Eliminates dead variable assignments based on backward liveness analysis while safeguarding all side-effecting operations and global variables.
+- **Pipeline Runner & Equivalence Validator (`vela.opt.pipeline`, `validate`)**:
+  - Iterative fixed-point driver recording step-by-step before/after code transformations and reduction metrics.
+  - Structural IR well-formedness validation (all jump targets defined, zero plain boolean opcodes).
+  - Semantic equivalence verified across all 10 standard language examples and invalid runtime programs (`INV-RUN-01..05`).
+
+### Key Algorithms & Design Choices
+1. **Dragon Book Algorithm 8.5 Leader Rules**:
+   - The first instruction of the program/function is a leader.
+   - Any instruction that is the target of a conditional or unconditional jump is a leader.
+   - Any instruction that immediately follows a jump, branch, or return is a leader.
+2. **Dominators and Loop Reconstruction**:
+   Back-edges are identified as edges $n \to d$ where $d$ dominates $n$. A function call is explicitly distinguished from an intra-procedural jump so recursive calls do not create false loops. The natural loop is reconstructed via reverse depth-first traversal from $n$ without passing through $d$.
+3. **Data-Flow Semi-Lattice Solver**:
+   Generic round-robin/worklist propagation with boundary conditions and universe pre-seeding. Records snapshots of `IN` and `OUT` sets after every iteration for educational visualization.
+4. **Safety and Equivalence Invariants**:
+   - *Division by Zero*: Constant folding refuses to fold expressions with divisor 0, guaranteeing that runtime error `VL-RUN-001` is triggered at the exact location expected.
+   - *Global State Protection*: Function calls (`CALL`) invalidate all global variables in constant and copy environments; dead-code elimination never removes assignments to global variables within functions.
+
+### Viva Q&A
+1. **Q: Why must constant folding NEVER fold division or modulo by zero?**
+   **A:** If the compiler folded `10 / 0` at compile time, the code could either crash the compiler or replace the computation with an arbitrary value or compile-time error. However, in Vela, division by zero is a runtime exception (`VL-RUN-001`). In branches that may never execute at runtime (e.g. inside dead or conditional code), folding division by zero would incorrectly terminate compilation or change program semantics. Thus, preserving the `DIV` quadruple ensures the runtime oracle/VM triggers the exact runtime exception at the correct execution step.
+2. **Q: What is the difference between S-attributed/L-attributed SDDs and Forward/Backward Data-Flow analyses?**
+   **A:** SDDs operate on parse trees/ASTs during parsing or semantic analysis; S-attributed flows bottom-up (synthesized) and L-attributed flows top-down and left-to-right (inherited). Data-flow analysis operates on control-flow graphs (CFGs) over basic blocks; forward problems (e.g. Reaching Definitions) propagate information along control flow edges, while backward problems (e.g. Live Variables) propagate information against control flow edges from exit to entry.
+3. **Q: How does Common Subexpression Elimination (CSE) leverage both local DAGs and global data-flow?**
+   **A:** Within a single basic block, an Expression DAG uses value numbering to identify identical subtrees and canonicalize commutative operations ($a + b = b + a$) in $O(1)$ hash lookups. Across multiple basic blocks, Global Available Expressions analysis computes the intersection of expressions available along all paths reaching a block. When an available expression is computed, the compiler reuses the previously stored temporary, avoiding redundant operations across control-flow joins.

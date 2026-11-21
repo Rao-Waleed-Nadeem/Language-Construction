@@ -101,7 +101,16 @@ Last updated: 2026-11-21   Run #: 1
 | P5-12 | (project goal) TAC interpreter as an independent oracle | SATISFIED | `ir/interpreter.py` executing TAC with exact runtime semantics, oracle for all 10 examples and invalid runs |
 | P6-01 | Basic block identification | SATISFIED | `opt/blocks.py` with Algorithm 8.5 leader rules and reasons |
 | P6-02 | Control-flow graph construction | SATISFIED | `opt/cfg.py`, `dominators.py` with CFG edges, dominator trees, back edges, natural loops |
+| P6-03 | DAG-based optimization | SATISFIED | `ast/dag.py` and `opt/passes/cse.py` for local value numbering |
+| P6-04 | Constant folding | SATISFIED | `opt/passes/const_fold.py` with 32-bit wrap-around and zero-division safety protection |
+| P6-05 | Constant propagation | SATISFIED | `opt/passes/const_prop.py` with local block env and reaching definitions |
+| P6-06 | Common-subexpression elimination | SATISFIED | `opt/passes/cse.py` with local expression table and global available expressions |
+| P6-07 | Dead-code elimination | SATISFIED | `opt/passes/dce.py` with backward liveness, side-effect and global preservation |
+| P6-08 | Copy propagation | SATISFIED | `opt/passes/copy_prop.py` with available copies propagation |
+| P6-09 | Loop optimization | SATISFIED | `opt/passes/licm.py` and `strength.py` with natural loop hoisting and multiplication reduction |
 | P6-10 | Global optimization: data-flow framework | SATISFIED | `opt/dataflow.py` forward & backward worklist solver, reaching defs, liveness, available exprs/copies, iteration logs |
+| P6-12 | Comparison of original vs optimized code | SATISFIED | `opt/pipeline.py` recording before/after diffs, change records, and reduction metrics |
+| P6-13 | (project goal) Optimizations preserve behavior | SATISFIED | `opt/validate.py` with well-formedness checks and oracle equivalence on all examples & invalid runs |
 
 ## Known limitations
 None yet.
@@ -127,5 +136,6 @@ None.
   - M4-T4: Expression DAG complete (`vela.ast.dag`). 111 tests passing. Milestone M4 complete!
   - M5-T1: TAC model and generator complete (`vela.ir.tac`, `generator`, `printer`). 120 tests passing.
   - M5-T2: TAC interpreter oracle complete (`vela.ir.interpreter`). 139 tests passing. Milestone M5 complete!
-  - M6-T1: Basic blocks, CFG, dominators, and natural loop detection complete (`vela.opt.blocks`, `cfg`, `dominators`). 143 tests passing. Next: M6-T2.
-  - M6-T2: Data-flow analysis framework complete (`vela.opt.dataflow` for reaching definitions, live variables, available expressions, available copies). 147 tests passing. Next: M6-T3.
+  - M6-T1: Basic blocks, CFG, dominators, and natural loop detection complete (`vela.opt.blocks`, `cfg`, `dominators`). 143 tests passing.
+  - M6-T2: Data-flow analysis framework complete (`vela.opt.dataflow` for reaching definitions, live variables, available expressions, available copies). 147 tests passing.
+  - M6-T3: Optimization passes and pipeline complete (`vela.opt.passes.*`, `pipeline`, `validate`). 154 tests passing. Milestone M6 complete! Next: Milestone M7 (Target Code and Virtual Machine).

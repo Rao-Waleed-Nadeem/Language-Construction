@@ -20,6 +20,8 @@ from vela.opt.dataflow import (
     solve_reaching_definitions,
 )
 from vela.opt.dominators import DominatorInfo, compute_dominators
+from vela.opt.pipeline import OptimizationResult, OptimizerPipeline, PassReport, optimize_tac
+from vela.opt.validate import TACValidationError, validate_tac_well_formedness, verify_equivalence
 
 __all__ = [
     "BasicBlock",
@@ -35,11 +37,18 @@ __all__ = [
     "IterationLog",
     "Leader",
     "MeetOperator",
+    "OptimizationResult",
+    "OptimizerPipeline",
+    "PassReport",
+    "TACValidationError",
     "build_cfg",
     "compute_dominators",
+    "optimize_tac",
     "partition_into_blocks",
     "solve_available_copies",
     "solve_available_expressions",
     "solve_live_variables",
     "solve_reaching_definitions",
+    "validate_tac_well_formedness",
+    "verify_equivalence",
 ]
