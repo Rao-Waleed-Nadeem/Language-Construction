@@ -1,0 +1,7 @@
+func add(a: int, b: int): int { // INV-SEM-06
+    return a + b;
+}
+
+func main() {
+    show add(1);
+}

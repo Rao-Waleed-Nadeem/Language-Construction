@@ -1,0 +1,3 @@
+func main() { // INV-SEM-09
+    break;
+}

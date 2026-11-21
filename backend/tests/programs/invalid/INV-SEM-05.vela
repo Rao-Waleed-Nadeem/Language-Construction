@@ -1,0 +1,5 @@
+func main() { // INV-SEM-05
+    if (1) {
+        show 1;
+    }
+}

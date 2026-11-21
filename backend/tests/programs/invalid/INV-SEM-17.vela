@@ -1,0 +1,7 @@
+func hello() { // INV-SEM-17
+    show 1;
+}
+
+func main() {
+    let x: int = hello();
+}

@@ -1,0 +1,7 @@
+func twice(n: int): int { // INV-SEM-07
+    return n * 2;
+}
+
+func main() {
+    show twice("x");
+}

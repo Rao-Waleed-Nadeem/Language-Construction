@@ -67,6 +67,7 @@ class VarDecl(ASTNode):
     array_size: int | None = None
     init: Expr | None = None
     array_inits: list[Expr] = field(default_factory=list)
+    name_span: Span | None = None
 
     @property
     def is_array(self) -> bool:
@@ -109,6 +110,7 @@ class FuncDecl(ASTNode):
     params: list[Param] = field(default_factory=list)
     return_type: str | None = None
     body: Block = field(default_factory=lambda: Block(id=0, span=Span.point(None)))  # type: ignore
+    name_span: Span | None = None
 
     def children(self) -> list[ASTNode]:
         return list(self.params) + [self.body]
@@ -186,6 +188,7 @@ class IfStmt(Stmt):
 class CaseClause(ASTNode):
     labels: list[int | str] = field(default_factory=list)  # int literals or char literals
     body: list[Stmt] = field(default_factory=list)
+    label_spans: list[Span] = field(default_factory=list)
 
     def children(self) -> list[ASTNode]:
         return list(self.body)
@@ -292,12 +295,12 @@ class ReturnStmt(Stmt):
 
 @dataclass
 class BreakStmt(Stmt):
-    pass
+    keyword_span: Span | None = None
 
 
 @dataclass
 class ContinueStmt(Stmt):
-    pass
+    keyword_span: Span | None = None
 
 
 @dataclass
@@ -379,6 +382,7 @@ class BinaryExpr(Expr):
     left: Expr = field(default_factory=lambda: LiteralExpr(0, None, "int", 0))  # type: ignore
     op: str = "+"
     right: Expr = field(default_factory=lambda: LiteralExpr(0, None, "int", 0))  # type: ignore
+    op_span: Span | None = None
 
     def children(self) -> list[ASTNode]:
         return [self.left, self.right]
@@ -412,6 +416,7 @@ class UnaryExpr(Expr):
 class CastExpr(Expr):
     expr: Expr = field(default_factory=lambda: LiteralExpr(0, None, "int", 0))  # type: ignore
     target_type: str = "float"
+    as_span: Span | None = None
 
     def children(self) -> list[ASTNode]:
         return [self.expr]
@@ -448,6 +453,7 @@ class ImplicitCast(Expr):
 class CallExpr(Expr):
     callee: str = ""
     args: list[Expr] = field(default_factory=list)
+    callee_span: Span | None = None
 
     def children(self) -> list[ASTNode]:
         return list(self.args)

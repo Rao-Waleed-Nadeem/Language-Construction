@@ -1,0 +1,4 @@
+func main() { // INV-SEM-13
+    let a: int[3];
+    a[3] = 1;
+}

@@ -1,0 +1,7 @@
+func hello() { // INV-SEM-11
+    return 1;
+}
+
+func main() {
+    hello();
+}

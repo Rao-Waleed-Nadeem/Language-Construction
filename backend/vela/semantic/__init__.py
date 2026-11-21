@@ -1,5 +1,6 @@
 """Vela Semantic Analysis Package."""
 
+from vela.semantic.checker import CheckResult, SemanticChecker, check_source
 from vela.semantic.returns import block_returns, statement_returns
 from vela.semantic.symbols import Scope, ScopeKind, Symbol, SymbolEvent, SymbolTable
 from vela.semantic.types import (
@@ -30,8 +31,10 @@ __all__ = [
     "STRING",
     "VOID",
     "ArrayType",
+    "CheckResult",
     "Scope",
     "ScopeKind",
+    "SemanticChecker",
     "Symbol",
     "SymbolEvent",
     "SymbolTable",
@@ -40,6 +43,7 @@ __all__ = [
     "block_returns",
     "can_explicit_cast",
     "can_implicit_widen",
+    "check_source",
     "get_binary_op_result_type",
     "get_type_by_name",
     "get_unary_op_result_type",

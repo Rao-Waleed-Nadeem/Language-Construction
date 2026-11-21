@@ -251,8 +251,11 @@ class RecursiveDescentParser:
         if self.current.symbol != "ID":
             self.error(f"expected function name, found '{self.current.lexeme}'")
             name = ""
+            name_span = self.current.span
         else:
-            name = self.advance().lexeme
+            name_tok = self.advance()
+            name = name_tok.lexeme
+            name_span = name_tok.span
 
         self.match("(")
         params = self.parse_params_opt()
@@ -268,6 +271,7 @@ class RecursiveDescentParser:
             params=params,
             return_type=ret_type,
             body=body,
+            name_span=name_span,
         )
 
     def parse_params_opt(self) -> list[Param]:
@@ -337,8 +341,11 @@ class RecursiveDescentParser:
         if self.current.symbol != "ID":
             self.error(f"expected variable identifier, found '{self.current.lexeme}'")
             name = ""
+            name_span = self.current.span
         else:
-            name = self.advance().lexeme
+            name_tok = self.advance()
+            name = name_tok.lexeme
+            name_span = name_tok.span
 
         # INV-SYN-07: expected ':' after the variable name
         if self.current.symbol != ":":
@@ -355,6 +362,7 @@ class RecursiveDescentParser:
                 span=Span(let_tok.span.start, self.current.span.end),
                 name=name,
                 type_name="int",
+                name_span=name_span,
             )
         self.advance()  # consume ':'
 
@@ -409,6 +417,7 @@ class RecursiveDescentParser:
             array_size=array_size,
             init=init,
             array_inits=array_inits,
+            name_span=name_span,
         )
 
     def parse_block(self) -> Block:
@@ -515,6 +524,7 @@ class RecursiveDescentParser:
                 span=Span(id_tok.span.start, close_paren.span.end),
                 callee=id_tok.lexeme,
                 args=args,
+                callee_span=id_tok.span,
             )
             return CallStmt(
                 id=self._next_id(),
@@ -639,10 +649,16 @@ class RecursiveDescentParser:
         """CaseClause -> case CaseLabels : StmtList."""
         self._enter("CaseClause")
         case_tok = self.advance()  # consume 'case'
-        labels = [self.parse_case_const()]
+        labels = []
+        label_spans = []
+        c_val, c_span = self.parse_case_const()
+        labels.append(c_val)
+        label_spans.append(c_span)
         while self.current.symbol == ",":
             self.advance()
-            labels.append(self.parse_case_const())
+            c_val, c_span = self.parse_case_const()
+            labels.append(c_val)
+            label_spans.append(c_span)
         self.match(":")
 
         stmts: list[Stmt] = []
@@ -658,24 +674,27 @@ class RecursiveDescentParser:
             span=Span(case_tok.span.start, end_span.end),
             labels=labels,
             body=stmts,
+            label_spans=label_spans,
         )
 
-    def parse_case_const(self) -> int | str:
+    def parse_case_const(self) -> tuple[int | str, Span]:
         """CaseConst -> INT_LIT | CHAR_LIT | - INT_LIT."""
         if self.current.symbol == "-":
-            self.advance()
+            neg_tok = self.advance()
             lit = self.match("INT_LIT")
             val = int(lit.value if lit.value is not None else lit.lexeme)
-            return -val
+            return -val, Span(neg_tok.span.start, lit.span.end)
         if self.current.symbol == "INT_LIT":
             lit = self.advance()
-            return int(lit.value if lit.value is not None else lit.lexeme)
+            val = int(lit.value if lit.value is not None else lit.lexeme)
+            return val, lit.span
         if self.current.symbol == "CHAR_LIT":
             lit = self.advance()
-            return str(lit.value if lit.value is not None else lit.lexeme[1:-1])
+            ch_val = str(lit.value if lit.value is not None else lit.lexeme[1:-1])
+            return ch_val, lit.span
 
         self.error(f"expected case constant, found '{self.current.lexeme}'")
-        return 0
+        return 0, self.current.span
 
     def parse_while_stmt(self) -> WhileStmt:
         """WhileStmt -> while ( Expr ) Block."""
@@ -835,7 +854,7 @@ class RecursiveDescentParser:
         b_tok = self.advance()
         semi = self.match(";")
         self._exit("BreakStmt")
-        return BreakStmt(id=self._next_id(), span=Span(b_tok.span.start, semi.span.end))
+        return BreakStmt(id=self._next_id(), span=Span(b_tok.span.start, semi.span.end), keyword_span=b_tok.span)
 
     def parse_continue_stmt(self) -> ContinueStmt:
         """ContinueStmt -> continue ;"""
@@ -843,7 +862,7 @@ class RecursiveDescentParser:
         c_tok = self.advance()
         semi = self.match(";")
         self._exit("ContinueStmt")
-        return ContinueStmt(id=self._next_id(), span=Span(c_tok.span.start, semi.span.end))
+        return ContinueStmt(id=self._next_id(), span=Span(c_tok.span.start, semi.span.end), keyword_span=c_tok.span)
 
     def parse_show_stmt(self) -> ShowStmt:
         """ShowStmt -> show ExprList ;"""
@@ -911,6 +930,7 @@ class RecursiveDescentParser:
                 left=left,
                 op=op_tok.symbol,
                 right=right,
+                op_span=op_tok.span,
             )
         return left
 
@@ -926,6 +946,7 @@ class RecursiveDescentParser:
                 left=left,
                 op=op_tok.symbol,
                 right=right,
+                op_span=op_tok.span,
             )
         return left
 
@@ -954,6 +975,7 @@ class RecursiveDescentParser:
                 left=left,
                 op=op_tok.symbol,
                 right=right,
+                op_span=op_tok.span,
             )
         return left
 
@@ -969,6 +991,7 @@ class RecursiveDescentParser:
                 left=left,
                 op=op_tok.symbol,
                 right=right,
+                op_span=op_tok.span,
             )
         return left
 
@@ -984,6 +1007,7 @@ class RecursiveDescentParser:
                 left=left,
                 op=op_tok.symbol,
                 right=right,
+                op_span=op_tok.span,
             )
         return left
 
@@ -999,6 +1023,7 @@ class RecursiveDescentParser:
                 left=left,
                 op=op_tok.symbol,
                 right=right,
+                op_span=op_tok.span,
             )
         return left
 
@@ -1019,13 +1044,14 @@ class RecursiveDescentParser:
         """CastExpr -> Primary CastTail; CastTail -> as BaseType CastTail | ε."""
         node = self.parse_primary()
         while self.current.symbol == "as":
-            self.advance()  # consume 'as'
+            as_tok = self.advance()  # consume 'as'
             btype = self.parse_base_type()
             node = CastExpr(
                 id=self._next_id(),
                 span=Span(node.span.start, self.current.span.start),
                 expr=node,
                 target_type=btype,
+                as_span=as_tok.span,
             )
         return node
 
@@ -1072,6 +1098,7 @@ class RecursiveDescentParser:
                     span=Span(id_tok.span.start, close_p.span.end),
                     callee=id_tok.lexeme,
                     args=args,
+                    callee_span=id_tok.span,
                 )
             if self.current.symbol == "[":
                 # Array index

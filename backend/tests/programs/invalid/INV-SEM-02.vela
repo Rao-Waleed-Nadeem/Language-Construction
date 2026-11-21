@@ -1,0 +1,4 @@
+func main() { // INV-SEM-02
+    let a: int = 1;
+    let a: int = 2;
+}

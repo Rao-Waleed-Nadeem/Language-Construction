@@ -1,0 +1,4 @@
+func main() { // INV-SEM-04
+    let f: float = 1.5;
+    let i: int = f;
+}

@@ -1,0 +1,9 @@
+func sign(n: int): int { // INV-SEM-08
+    if (n > 0) {
+        return 1;
+    }
+}
+
+func main() {
+    show sign(2);
+}

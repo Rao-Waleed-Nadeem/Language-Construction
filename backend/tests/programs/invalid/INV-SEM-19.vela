@@ -1,0 +1,6 @@
+func main() { // INV-SEM-19
+    let s: string = "x";
+    switch (s) {
+        case 1: show 1;
+    }
+}

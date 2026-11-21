@@ -1,0 +1,7 @@
+func main() { // INV-SEM-10
+    let n: int = 1;
+    switch (n) {
+        case 1: show 1;
+        case 1: show 2;
+    }
+}

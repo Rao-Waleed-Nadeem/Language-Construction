@@ -1,0 +1,3 @@
+func helper() { // INV-SEM-14
+    show 1;
+}

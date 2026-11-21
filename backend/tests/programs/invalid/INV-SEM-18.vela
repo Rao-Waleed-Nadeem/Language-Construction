@@ -1,0 +1,6 @@
+let a: int = 1; // INV-SEM-18
+let b: int = a + 1;
+
+func main() {
+    show b;
+}
