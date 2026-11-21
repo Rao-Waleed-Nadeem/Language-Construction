@@ -11,7 +11,7 @@ Last updated: 2026-11-21   Run #: 1
 | M2-T1 | Model, loader, analysis | DONE | `powershell -File .\scripts\test.ps1` → 33 passed; loads 13/13 .bnf files, FOLLOW(IfStmt) has no else, AP-5 grammar-lexer consistency | 2026-11-21 | BNFLoader, GrammarAnalysis, ChomskyClassifier |
 | M2-T2 | Transformations | DONE | `powershell -File .\scripts\test.ps1` → 36 passed; eliminates indirect/immediate left recursion, left factors common prefixes, generates step logs | 2026-11-21 | Algorithm 4.19 and 4.22 in transform.py |
 | M2-T3 | LL(1) tools | DONE | `powershell -File .\scripts\test.ps1` → 42 passed; vela_ll1 0 conflicts, vela.bnf 19 conflicts, presets report conflicts, ll1_expr parses tokens | 2026-11-21 | LL1Table, conflicts, predictive parser, rdgen |
-| M2-T4 | LR family | TODO | | | |
+| M2-T4 | LR family | DONE | `powershell -File .\scripts\test.ps1` → 51 passed; reproduces all golden metrics: vela.bnf LR(0)=214, SLR(1)=214/0, LALR(1)=214/0, CLR(1)=609/0; presets verified | 2026-11-21 | LRBuilder, ShiftReduceParser, OperatorPrecedenceTable |
 | M3-T1 | AST nodes | TODO | | | |
 | M3-T2 | Recursive-descent parser | TODO | | | |
 | M4-T1 | Types and symbols | TODO | | | |
@@ -67,6 +67,13 @@ Last updated: 2026-11-21   Run #: 1
 | P3-05 | Left-recursion elimination | SATISFIED | `eliminate_left_recursion` handles immediate & indirect left recursion with step logs |
 | P3-06 | Left factoring | SATISFIED | `left_factor` algorithm extracts common prefixes with step logs |
 | P3-03 | LL(1) parsing | SATISFIED | `LL1Table` table construction, conflict detection (G' 0 conflicts, G 19 conflicts), predictive parser |
+| P3-07 | Ambiguous-grammar resolution incl. dangling else | SATISFIED | S/R conflict detection and precedence/associativity resolution verified on `expr_ambiguous` |
+| P3-08 | Operator-precedence parsing | SATISFIED | `OperatorPrecedenceTable` eligibility check, relations, and parsing verified |
+| P3-09 | Bottom-up shift-reduce parsing | SATISFIED | `ShiftReduceParser` driver, trace, and parse tree verified on `slr_expr` |
+| P3-10 | LR(0) parsing and table construction | SATISFIED | `LRBuilder.build_lr0()` verifies golden 214 states for `vela.bnf` |
+| P3-11 | SLR(1) parsing and table construction | SATISFIED | `LRBuilder.build_slr1()` verifies 214 states and 0 conflicts for `vela.bnf` |
+| P3-12 | CLR(1) parsing and table construction | SATISFIED | `LRBuilder.build_clr1()` verifies golden 609 states and 0 conflicts for `vela.bnf` |
+| P3-13 | LALR(1) parsing and table construction | SATISFIED | `LRBuilder.build_lalr1()` merges by core, verifying golden 214 states and 0 conflicts for `vela.bnf` |
 
 ## Known limitations
 None yet.
@@ -82,4 +89,5 @@ None.
   - M1-T2: Scanner, buffer, DFA simulator complete (`vela.lexer.tokens`, `buffer`, `fsm`, `scanner`). 27 tests passing. Milestone M1 complete.
   - M2-T1: Grammar engine model, loader, analysis, Chomsky classifier complete (`vela.grammar.model`, `loader`, `analysis`, `classify`). 33 tests passing.
   - M2-T2: Transformations complete (`vela.grammar.transform` for immediate & indirect left recursion, left factoring). 36 tests passing.
-  - M2-T3: LL(1) tools complete (`vela.grammar.ll1`, `rdgen`). 42 tests passing. Next: M2-T4.
+  - M2-T3: LL(1) tools complete (`vela.grammar.ll1`, `rdgen`). 42 tests passing.
+  - M2-T4: LR family and operator precedence complete (`vela.grammar.lr`, `shift_reduce`, `op_precedence`). 51 tests passing. Milestone M2 complete. Next: M3-T1.

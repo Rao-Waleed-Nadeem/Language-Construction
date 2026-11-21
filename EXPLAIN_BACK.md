@@ -47,3 +47,32 @@ Consolidated architectural summaries and viva preparation material for each comp
    **A:** The lexer uses the longest-match (maximal munch) rule implemented in `OperatorDFA`. When seeing `=`, it does not immediately commit; it checks if the next character is `=`. If so, it transitions to state `EQ` (`==`). Only when no further valid transition exists does it accept the longest match.
 3. **Q: How are lexical errors recovered from, and why is recovery important?**
    **A:** The scanner uses panic-mode/character-skip recovery: on an invalid character (`VL-LEX-001`), it emits a diagnostic with the exact span, skips the invalid character, and resumes scanning the next token. This ensures all lexical errors in a file are reported in a single compiler run rather than halting on the very first typo.
+
+---
+
+## Milestone M2 — Grammar Engine & Parsing Theory (Phase 3 Theory)
+
+### What the modules do
+- **`vela.grammar.model` (`Production`, `Grammar`)**: Represents productions $A \to \alpha$ and immutable grammar specifications.
+- **`vela.grammar.loader` (`BNFLoader`)**: Loads arbitrary context-free grammars from plain BNF text files, handling continuation lines (`|`), comments (`#`), and $\varepsilon$.
+- **`vela.grammar.analysis` (`GrammarAnalysis`)**: Implements fixed-point iterative calculations for `nullable`, $FIRST$, and $FOLLOW$ sets, capturing step-by-step derivation history.
+- **`vela.grammar.classify` (`classify_grammar`)**: Categorizes grammars according to the Chomsky Hierarchy into Type 2 (Context-Free) or Type 3 (Regular: left/right linear) with explicit justification.
+- **`vela.grammar.transform` (`eliminate_left_recursion`, `left_factor`)**: Implements Dragon Book Algorithm 4.19 (indirect and immediate left recursion removal) and Algorithm 4.22 (left factoring) with pedagogical step logs.
+- **`vela.grammar.ll1` (`LL1Table`)**: Builds predictive parsing tables $M[A, a]$, identifies FIRST/FIRST and FIRST/FOLLOW conflicts, and executes predictive stack parsing.
+- **`vela.grammar.rdgen` (`RecursiveDescentGenerator`)**: Translates LL(1) parsing tables into executable recursive-descent pseudocode for display in the Grammar Lab.
+- **`vela.grammar.lr` (`LRBuilder`, `LRTable`)**: Constructs item-set automata and parsing tables for the entire LR family: LR(0), SLR(1), CLR(1), and LALR(1) (via core-merging). Enforces a 5 000-state cap and implements precedence/associativity conflict resolution.
+- **`vela.grammar.shift_reduce` (`ShiftReduceParser`)**: Simulates LR shift-reduce parsing, builds concrete parse tree nodes during reductions, and outputs step-by-step stack traces.
+- **`vela.grammar.op_precedence` (`OperatorPrecedenceTable`)**: Verifies operator-grammar eligibility, computes $LEADING$ and $TRAILING$ sets, generates precedence relations ($\lessdot, \doteq, \gtrdot$), detects ambiguity conflicts (such as unary vs binary minus), and executes operator-precedence parsing.
+
+### Key Algorithms & Data Structures
+1. **LR(1) State Merging by Core for LALR(1)**: Groups CLR(1) states by their LR(0) item cores. For states sharing the same core, item lookaheads are unioned. Reduces state space from 609 to 214 states on Vela's grammar while avoiding parse table bloat.
+2. **Fixed-Point Iterative Analysis**: $FIRST$ and $FOLLOW$ sets are computed by repeatedly applying production rules across all symbols until an iteration produces zero changes ($O(P \cdot |V|)$).
+3. **Ambiguity Resolution via Precedence**: When shift/reduce conflicts arise in ambiguous expressions ($E \to E + E$), the conflict is resolved by comparing operator precedence levels and associativity (left-associative favors reduce, right-associative favors shift).
+
+### Viva Questions & Answers
+1. **Q: Why does the authoritative grammar `vela.bnf` have LR(0) conflicts but 0 SLR(1) conflicts?**
+   **A:** LR(0) reduces whenever an item has the dot at the end $[A \to \alpha \cdot]$ regardless of the lookahead token, causing shift/reduce conflicts in any state that also has a valid shift. SLR(1) restricts reduction to only tokens in $FOLLOW(A)$. Because $FOLLOW(A)$ is disjoint from the shift tokens in every state of `vela.bnf`, all 33 LR(0) conflicts disappear in SLR(1).
+2. **Q: Why can LALR(1) parsing introduce reduce/reduce conflicts that do not exist in CLR(1)?**
+   **A:** Merging two CLR(1) states with identical cores combines their lookaheads. If two different productions $A \to \alpha$ and $B \to \alpha$ had disjoint lookaheads $\{a\}$ and $\{b\}$ in separate states, merging the states can cause both reductions to be valid on the union of lookaheads, creating a reduce/reduce conflict (as demonstrated in `not_lalr_but_clr.bnf`).
+3. **Q: Why does operator-precedence parsing fail when unary and binary minus share the same `-` token?**
+   **A:** In operator grammars, relations ($\lessdot, \gtrdot$) are strictly binary relations between pairs of terminals. Binary minus needs lower precedence than multiplication ($+ \lessdot *$), but unary minus needs higher precedence ($* \lessdot -$). When both use `-`, both relations hold simultaneously ($- \lessdot -$ and $- \gtrdot -$), resulting in an unresolvable relation conflict. Vela's Grammar Lab demonstrates this with `vela_expr_operator.bnf`.
