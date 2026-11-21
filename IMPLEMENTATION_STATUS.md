@@ -101,6 +101,7 @@ Last updated: 2026-11-21   Run #: 1
 | P5-12 | (project goal) TAC interpreter as an independent oracle | SATISFIED | `ir/interpreter.py` executing TAC with exact runtime semantics, oracle for all 10 examples and invalid runs |
 | P6-01 | Basic block identification | SATISFIED | `opt/blocks.py` with Algorithm 8.5 leader rules and reasons |
 | P6-02 | Control-flow graph construction | SATISFIED | `opt/cfg.py`, `dominators.py` with CFG edges, dominator trees, back edges, natural loops |
+| P6-10 | Global optimization: data-flow framework | SATISFIED | `opt/dataflow.py` forward & backward worklist solver, reaching defs, liveness, available exprs/copies, iteration logs |
 
 ## Known limitations
 None yet.
@@ -127,3 +128,4 @@ None.
   - M5-T1: TAC model and generator complete (`vela.ir.tac`, `generator`, `printer`). 120 tests passing.
   - M5-T2: TAC interpreter oracle complete (`vela.ir.interpreter`). 139 tests passing. Milestone M5 complete!
   - M6-T1: Basic blocks, CFG, dominators, and natural loop detection complete (`vela.opt.blocks`, `cfg`, `dominators`). 143 tests passing. Next: M6-T2.
+  - M6-T2: Data-flow analysis framework complete (`vela.opt.dataflow` for reaching definitions, live variables, available expressions, available copies). 147 tests passing. Next: M6-T3.
