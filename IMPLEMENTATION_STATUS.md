@@ -6,7 +6,7 @@ Last updated: 2026-11-21   Run #: 1
 |----|------|--------|--------------------------------|------|-------|
 | M0-T1 | Skeleton and tooling | DONE | `powershell -File .\scripts\test.ps1` → 2 passed, ruff clean, tsc clean; `npm run build` → exit 0; pure import OK | 2026-11-21 | Workspace, backend venv, frontend, scripts |
 | M0-T2 | Common foundations | DONE | `powershell -File .\scripts\test.ps1` → 8 passed; covers normalization, line/col conversion, all 47 diagnostic codes | 2026-11-21 | SourceFile, Span, Diagnostic, Limits, Budget |
-| M1-T1 | Language tables | TODO | | | |
+| M1-T1 | Language tables | DONE | `powershell -File .\scripts\test.ps1` → 15 passed; asserts exactly 26 keywords, operators, delimiters, precedence, regexes | 2026-11-21 | spec.py single source of truth |
 | M1-T2 | DFA, buffer, scanner | TODO | | | |
 | M2-T1 | Model, loader, analysis | TODO | | | |
 | M2-T2 | Transformations | TODO | | | |
@@ -42,6 +42,14 @@ Last updated: 2026-11-21   Run #: 1
 ## Requirement coverage (doc 00 §4)
 | Requirement ID | Description | Status | Evidence |
 |---|---|---|---|
+| LD-02 | Keywords and reserved words (26) | SATISFIED | `test_keywords_count_and_uniqueness` asserts 26 keywords |
+| LD-15 | Mandatory data types int, float, char, string, bool | SATISFIED | `test_base_types` asserts all 5 base types |
+| LD-17 | Mandatory arithmetic `+ - * / %` | SATISFIED | `test_operators` in `test_language_spec.py` |
+| LD-18 | Mandatory relational `> < >= <= == !=` | SATISFIED | `test_operators` in `test_language_spec.py` |
+| LD-19 | Mandatory logical AND, OR, NOT | SATISFIED | `test_operators` in `test_language_spec.py` |
+| P1-02 | Identify keywords, identifiers, literals, operators | SATISFIED | `vela.language.spec` tables and unit tests |
+| P1-05 | Operator precedence and associativity | SATISFIED | `test_precedence_table` 8 levels verified |
+| P2-01 | Regular expressions for tokens | SATISFIED | `test_token_regexes` in `test_language_spec.py` |
 
 ## Known limitations
 None yet.
@@ -52,4 +60,5 @@ None.
 ## Run log
 - **Run #1 (2026-11-21):**
   - M0-T1: Workspace skeleton and tooling complete.
-  - M0-T2: Common foundations complete (`vela.common.source`, `diagnostics`, `limits`, `budget`). 8 unit tests passing. Milestone M0 complete. Next: M1-T1.
+  - M0-T2: Common foundations complete (`vela.common.source`, `diagnostics`, `limits`, `budget`). 8 unit tests passing. Milestone M0 complete.
+  - M1-T1: Language tables complete (`vela.language.spec`). 15 unit tests passing. Next: M1-T2.
