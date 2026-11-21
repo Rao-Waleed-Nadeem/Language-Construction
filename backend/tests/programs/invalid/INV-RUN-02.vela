@@ -1,0 +1,5 @@
+func main() {
+    let a: int[3];
+    let i: int = 3;
+    a[i] = 1;
+}

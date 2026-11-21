@@ -1,0 +1,7 @@
+func f(n: int): int {
+    return f(n + 1);
+}
+
+func main() {
+    show f(0);
+}

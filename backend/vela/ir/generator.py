@@ -73,6 +73,9 @@ class TACGenerator:
         self._loop_stack: list[tuple[Label, Label]] = []
         # General break target stack for loops and switches
         self._break_stack: list[Label] = []
+        self._scope_stack: list[dict[str, int]] = [{}]
+        self._scope_counter = 1
+        self._var_types: dict[str, str] = {}
 
     def new_temp(self, type_name: str = "any") -> Temporary:
         self._temp_counter += 1
@@ -81,6 +84,13 @@ class TACGenerator:
     def new_label(self, prefix: str = "L") -> Label:
         self._label_counter += 1
         return Label(name=f"{prefix}_{self._label_counter}")
+
+    def _resolve_var_name(self, raw_name: str) -> str:
+        for scope in reversed(self._scope_stack):
+            if raw_name in scope:
+                sid = scope[raw_name]
+                return raw_name if sid == 1 else f"{raw_name}_{sid}"
+        return raw_name
 
     def emit(
         self,
@@ -111,6 +121,9 @@ class TACGenerator:
         self._label_counter = 0
         self._loop_stack.clear()
         self._break_stack.clear()
+        self._scope_counter = 1
+        self._scope_stack = [{}]
+        self._var_types.clear()
 
         global_vars = [item for item in program.items if isinstance(item, VarDecl)]
         func_decls = [item for item in program.items if isinstance(item, FuncDecl)]
@@ -151,6 +164,24 @@ class TACGenerator:
             rule_id="TAC-FUNC-BEGIN",
         )
 
+        self._scope_counter += 1
+        func_scope: dict[str, int] = {}
+        self._scope_stack.append(func_scope)
+
+        for param in func.params:
+            func_scope[param.name] = self._scope_counter
+            param_var_name = f"{param.name}_{self._scope_counter}"
+            self._var_types[param_var_name] = param.type_name
+            self.emit(
+                "RECEIVE",
+                None,
+                None,
+                Variable(param_var_name),
+                span=param.span,
+                ast_id=param.id,
+                rule_id="TAC-PARAM-RECEIVE",
+            )
+
         for stmt in func.body.statements:
             self._lower_stmt(stmt)
 
@@ -175,6 +206,7 @@ class TACGenerator:
             ast_id=func.id,
             rule_id="TAC-FUNC-END",
         )
+        self._scope_stack.pop()
 
     def _lower_stmt(self, stmt: Stmt) -> None:
         span = stmt.span
@@ -227,26 +259,38 @@ class TACGenerator:
                 self.emit("SHOW", val, None, None, span=ex.span, ast_id=ex.id, rule_id="TAC-SHOW")
             self.emit("SHOW_NL", None, None, None, span=span, ast_id=ast_id, rule_id="TAC-SHOW-NL")
 
+        elif isinstance(stmt, Block):
+            self._scope_counter += 1
+            block_scope: dict[str, int] = {}
+            self._scope_stack.append(block_scope)
+            for s in stmt.statements:
+                self._lower_stmt(s)
+            self._scope_stack.pop()
+
         elif isinstance(stmt, ReadStmt):
             if isinstance(stmt.target, VarRefExpr):
+                var_name = self._resolve_var_name(stmt.target.name)
+                type_name = self._var_types.get(var_name, "int")
                 self.emit(
                     "READ",
+                    Constant(type_name, "type"),
                     None,
-                    None,
-                    Variable(stmt.target.name),
+                    Variable(var_name),
                     span=span,
                     ast_id=ast_id,
                     rule_id="TAC-READ",
                 )
             elif isinstance(stmt.target, ArrayAccessExpr):
+                arr_name = self._resolve_var_name(stmt.target.name)
+                type_name = self._var_types.get(arr_name, "int")
                 idx = self._lower_expr(stmt.target.index)
-                t_read = self.new_temp()
-                self.emit("READ", None, None, t_read, span=span, ast_id=ast_id, rule_id="TAC-READ")
+                t_read = self.new_temp(type_name)
+                self.emit("READ", Constant(type_name, "type"), None, t_read, span=span, ast_id=ast_id, rule_id="TAC-READ")
                 self.emit(
                     "ARRAY_SET",
                     t_read,
                     idx,
-                    Variable(stmt.target.name),
+                    Variable(arr_name),
                     span=span,
                     ast_id=ast_id,
                     rule_id="TAC-READ-ARRAY",
@@ -260,29 +304,75 @@ class TACGenerator:
         ast_id = decl.id
         rule_id = "TAC-GLOBAL-DECL" if is_global else "TAC-LOCAL-DECL"
 
-        if decl.init is not None:
-            init_val = self._lower_expr(decl.init)
-            self.emit("ASSIGN", init_val, None, Variable(decl.name), span=span, ast_id=ast_id, rule_id=rule_id)
-        elif decl.array_size is not None and decl.array_inits:
+        if is_global:
+            var_name = decl.name
+            self._scope_stack[0][decl.name] = 1
+        else:
+            sid = self._scope_counter
+            self._scope_stack[-1][decl.name] = sid
+            var_name = f"{decl.name}_{sid}"
+
+        self._var_types[var_name] = decl.type_name
+        default_map = {
+            "int": 0,
+            "float": 0.0,
+            "char": "\0",
+            "string": "",
+            "bool": False,
+        }
+        btype = decl.type_name
+        def_val = default_map.get(btype, 0)
+
+        if decl.array_size is not None:
+            self.emit(
+                "ALLOC_ARRAY",
+                Constant(decl.array_size, "int"),
+                Constant(def_val, btype),
+                Variable(var_name),
+                span=span,
+                ast_id=ast_id,
+                rule_id=rule_id,
+            )
             for i, init_elem in enumerate(decl.array_inits):
                 elem_val = self._lower_expr(init_elem)
                 self.emit(
                     "ARRAY_SET",
                     elem_val,
                     Constant(i, "int"),
-                    Variable(decl.name),
+                    Variable(var_name),
                     span=span,
                     ast_id=ast_id,
                     rule_id=rule_id,
                 )
+        elif decl.init is not None:
+            init_val = self._lower_expr(decl.init)
+            self.emit("ASSIGN", init_val, None, Variable(var_name), span=span, ast_id=ast_id, rule_id=rule_id)
+        else:
+            self.emit(
+                "ASSIGN",
+                Constant(def_val, btype),
+                None,
+                Variable(var_name),
+                span=span,
+                ast_id=ast_id,
+                rule_id=rule_id,
+            )
 
     def _lower_assign_stmt(self, stmt: AssignStmt) -> None:
         span = stmt.span
         ast_id = stmt.id
 
         if isinstance(stmt.target, VarRefExpr):
-            var_op = Variable(stmt.target.name)
-            if stmt.op == "=" and stmt.value is not None:
+            var_op = Variable(self._resolve_var_name(stmt.target.name))
+            if stmt.op == "++":
+                t = self.new_temp()
+                self.emit("ADD", var_op, Constant(1, "int"), t, span=span, ast_id=ast_id, rule_id="TAC-INCREMENT")
+                self.emit("ASSIGN", t, None, var_op, span=span, ast_id=ast_id, rule_id="TAC-ASSIGN")
+            elif stmt.op == "--":
+                t = self.new_temp()
+                self.emit("SUB", var_op, Constant(1, "int"), t, span=span, ast_id=ast_id, rule_id="TAC-DECREMENT")
+                self.emit("ASSIGN", t, None, var_op, span=span, ast_id=ast_id, rule_id="TAC-ASSIGN")
+            elif stmt.op == "=" and stmt.value is not None:
                 val = self._lower_expr(stmt.value)
                 self.emit("ASSIGN", val, None, var_op, span=span, ast_id=ast_id, rule_id="TAC-ASSIGN")
             elif stmt.value is not None:
@@ -295,9 +385,21 @@ class TACGenerator:
                 self.emit("ASSIGN", t, None, var_op, span=span, ast_id=ast_id, rule_id="TAC-ASSIGN")
 
         elif isinstance(stmt.target, ArrayAccessExpr):
-            arr_var = Variable(stmt.target.name)
+            arr_var = Variable(self._resolve_var_name(stmt.target.name))
             idx = self._lower_expr(stmt.target.index)
-            if stmt.op == "=" and stmt.value is not None:
+            if stmt.op == "++":
+                cur = self.new_temp()
+                self.emit("ARRAY_GET", arr_var, idx, cur, span=span, ast_id=ast_id, rule_id="TAC-ARRAY-GET")
+                res = self.new_temp()
+                self.emit("ADD", cur, Constant(1, "int"), res, span=span, ast_id=ast_id, rule_id="TAC-INCREMENT")
+                self.emit("ARRAY_SET", res, idx, arr_var, span=span, ast_id=ast_id, rule_id="TAC-ARRAY-SET")
+            elif stmt.op == "--":
+                cur = self.new_temp()
+                self.emit("ARRAY_GET", arr_var, idx, cur, span=span, ast_id=ast_id, rule_id="TAC-ARRAY-GET")
+                res = self.new_temp()
+                self.emit("SUB", cur, Constant(1, "int"), res, span=span, ast_id=ast_id, rule_id="TAC-DECREMENT")
+                self.emit("ARRAY_SET", res, idx, arr_var, span=span, ast_id=ast_id, rule_id="TAC-ARRAY-SET")
+            elif stmt.op == "=" and stmt.value is not None:
                 val = self._lower_expr(stmt.value)
                 self.emit("ARRAY_SET", val, idx, arr_var, span=span, ast_id=ast_id, rule_id="TAC-ARRAY-SET")
             elif stmt.value is not None:
@@ -376,15 +478,15 @@ class TACGenerator:
         self._loop_stack.append((l_exit, l_cond))
         self._break_stack.append(l_exit)
 
-        self.emit("LABEL", None, None, l_cond, rule_id="TAC-LABEL")
+        self.emit("LABEL", None, None, l_cond, span=stmt.span, ast_id=stmt.id, rule_id="TAC-LABEL")
         cond_val = self._lower_expr(stmt.condition)
         self.emit("JUMP_IF_FALSE", cond_val, None, l_exit, span=stmt.span, ast_id=stmt.id, rule_id="TAC-WHILE")
 
         for s in stmt.body.statements:
             self._lower_stmt(s)
 
-        self.emit("JUMP", None, None, l_cond, rule_id="TAC-JUMP")
-        self.emit("LABEL", None, None, l_exit, rule_id="TAC-LABEL")
+        self.emit("JUMP", None, None, l_cond, span=stmt.span, ast_id=stmt.id, rule_id="TAC-JUMP")
+        self.emit("LABEL", None, None, l_exit, span=stmt.span, ast_id=stmt.id, rule_id="TAC-LABEL")
 
         self._break_stack.pop()
         self._loop_stack.pop()
@@ -397,14 +499,14 @@ class TACGenerator:
         self._loop_stack.append((l_exit, l_cond))
         self._break_stack.append(l_exit)
 
-        self.emit("LABEL", None, None, l_start, rule_id="TAC-LABEL")
+        self.emit("LABEL", None, None, l_start, span=stmt.span, ast_id=stmt.id, rule_id="TAC-LABEL")
         for s in stmt.body.statements:
             self._lower_stmt(s)
 
-        self.emit("LABEL", None, None, l_cond, rule_id="TAC-LABEL")
+        self.emit("LABEL", None, None, l_cond, span=stmt.span, ast_id=stmt.id, rule_id="TAC-LABEL")
         cond_val = self._lower_expr(stmt.condition)
         self.emit("JUMP_IF", cond_val, None, l_start, span=stmt.span, ast_id=stmt.id, rule_id="TAC-DOWHILE")
-        self.emit("LABEL", None, None, l_exit, rule_id="TAC-LABEL")
+        self.emit("LABEL", None, None, l_exit, span=stmt.span, ast_id=stmt.id, rule_id="TAC-LABEL")
 
         self._break_stack.pop()
         self._loop_stack.pop()
@@ -420,7 +522,7 @@ class TACGenerator:
         self._loop_stack.append((l_exit, l_update))
         self._break_stack.append(l_exit)
 
-        self.emit("LABEL", None, None, l_cond, rule_id="TAC-LABEL")
+        self.emit("LABEL", None, None, l_cond, span=stmt.span, ast_id=stmt.id, rule_id="TAC-LABEL")
         if stmt.condition is not None:
             cond_val = self._lower_expr(stmt.condition)
             self.emit("JUMP_IF_FALSE", cond_val, None, l_exit, span=stmt.span, ast_id=stmt.id, rule_id="TAC-FOR-COND")
@@ -428,12 +530,12 @@ class TACGenerator:
         for s in stmt.body.statements:
             self._lower_stmt(s)
 
-        self.emit("LABEL", None, None, l_update, rule_id="TAC-LABEL")
+        self.emit("LABEL", None, None, l_update, span=stmt.span, ast_id=stmt.id, rule_id="TAC-LABEL")
         if stmt.update is not None:
             self._lower_stmt(stmt.update)
 
-        self.emit("JUMP", None, None, l_cond, rule_id="TAC-JUMP")
-        self.emit("LABEL", None, None, l_exit, rule_id="TAC-LABEL")
+        self.emit("JUMP", None, None, l_cond, span=stmt.span, ast_id=stmt.id, rule_id="TAC-JUMP")
+        self.emit("LABEL", None, None, l_exit, span=stmt.span, ast_id=stmt.id, rule_id="TAC-LABEL")
 
         self._break_stack.pop()
         self._loop_stack.pop()
@@ -446,7 +548,7 @@ class TACGenerator:
             return Constant(value=expr.value, type_name=expr.literal_type)
 
         if isinstance(expr, VarRefExpr):
-            return Variable(name=expr.name)
+            return Variable(name=self._resolve_var_name(expr.name))
 
         if isinstance(expr, UnaryExpr):
             op_val = self._lower_expr(expr.operand)
@@ -477,7 +579,7 @@ class TACGenerator:
             t = self.new_temp()
             self.emit(
                 "ARRAY_GET",
-                Variable(expr.name),
+                Variable(self._resolve_var_name(expr.name)),
                 idx_val,
                 t,
                 span=span,
@@ -584,7 +686,8 @@ class TACGenerator:
             right_val = self._lower_expr(expr.right)
             op_name = OP_MAP.get(expr.op, "RAW_OP")
             t_res = self.new_temp()
-            self.emit(op_name, left_val, right_val, t_res, span=span, ast_id=ast_id, rule_id="TAC-BINOP")
+            bin_span = getattr(expr, "op_span", None) or span
+            self.emit(op_name, left_val, right_val, t_res, span=bin_span, ast_id=ast_id, rule_id="TAC-BINOP")
             return t_res
 
         # Fallback constant

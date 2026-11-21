@@ -128,3 +128,29 @@ Milestone M4 delivers the semantic verification and intermediate structure layer
    **A:** Value numbering assigns a unique identifier (value number) to each unique computation. When constructing an expression, the compiler checks if a node with the same operator and operand value numbers already exists. If so, it reuses the existing node instead of allocating a new one. In basic blocks, when a variable is reassigned, its mapping is updated to the new value number, naturally killing obsolete definitions while sharing unmutated subexpressions like `(a + b) * 2` and `(a + b) * 3`.
 3. **Q: Why is a two-pass semantic checker required rather than a single-pass traversal?**
    **A:** A two-pass checker decouples declaration order from use. Pass 1 collects all global variable and function signatures into the root symbol table. Pass 2 type-checks function bodies and expressions. This allows mutually recursive functions and forward calls (functions called before their definition in the source file) to resolve cleanly with complete type information.
+
+---
+
+## Milestone M5 — Intermediate Code (TAC) and Oracle Interpreter
+
+### Overview
+Milestone M5 delivers the intermediate representation and reference execution layer (Phase 5 of the compiler pipeline). It encompasses:
+- Strongly typed Three-Address Code (TAC) quadruple model (`vela.ir.tac`): Quadruple format `(opcode, arg1, arg2, result)` with full source span provenance, AST node references, and IR translation rule tags.
+- Intermediate Representation Lowering Generator (`vela.ir.generator`): Converts validated ASTs into linear TAC, handling global startup execution, function call conventions (`FUNC_BEGIN`, `PARAM`, `CALL`, `RECEIVE`, `RETURN`, `FUNC_END`), short-circuit boolean lowering with branches (no hardware/plain `and`/`or` instructions), control-flow loops with break/continue targets, and alpha-converted scope-disambiguated variables.
+- Linear TAC Pretty-Printer & Table Formatter (`vela.ir.printer`): Textual representation and structured quadruple table formatting for diagnostics and visual inspection.
+- Independent Execution Oracle & Interpreter (`vela.ir.interpreter`): Reference execution engine implementing exact language runtime semantics: 32-bit two's complement arithmetic wrap-around, truncating integer division toward zero, remainder with dividend sign, array bound checks, unified stream I/O, call stack overflow detection, instruction budgets, and runtime errors `VL-RUN-001` through `VL-RUN-008`.
+- Comprehensive Golden Verification: All 10 golden programs (`01_hello_types` through `10_scopes`) reproduce their exact `.expected.txt` character-by-character. Error catalog programs `INV-RUN-01` through `INV-RUN-05` reproduce exact error codes and line:col coordinates.
+
+### Key Algorithms & Design Choices
+1. **Short-Circuit Boolean Lowering**: In adherence to the strict requirement that no plain boolean `and`/`or` opcode exists in the TAC instruction set, logical conjunction and disjunction are translated into conditional jumps (`JUMP_IF_FALSE` / `JUMP_IF`) with jump labels and boolean constant assignments.
+2. **Alpha-Conversion Scope Renaming**: Nested scopes (blocks, functions, for-headers) are dynamically indexed during IR generation, disambiguating shadowed variable names (e.g. `level_2`, `level_3`) while maintaining plain global names, enabling seamless nested block semantics without dynamic scope lookups at runtime.
+3. **Two's Complement 32-Bit Arithmetic & Truncating Division**: Emulates standard 32-bit registers via `wrap32` bit masking. Division truncates toward zero (`int(a / b)`), and modulo follows C99/Vela conventions `a - (int(a / b) * b)`.
+4. **Unified Stream I/O Tokenizer**: A shared cursor across stdin ensures interleaved reading of tokens (`int`, `float`, `string`, `bool`) and whitespace-skipping raw characters (`char`) accurately reflects real POSIX/C stdin streams.
+
+### Viva Q&A
+1. **Q: Why are `and` and `or` logical operators lowered via conditional jumps rather than direct TAC instructions?**
+   **A:** Direct hardware-style boolean instructions force both operands to be evaluated eagerly, which would violate the short-circuit semantics mandated by modern programming languages (and Vela spec §6.4). By lowering `a and b` into `ifFalse a goto L_false`, the second operand `b` is never evaluated if `a` is false, preventing illegal memory accesses, division by zero, or side effects in the right-hand operand.
+2. **Q: How does the TAC interpreter serve as an independent execution oracle for the compiler?**
+   **A:** The TAC interpreter executes the machine-independent IR before any optimizations or machine-specific transformations take place. By verifying that the unoptimized TAC produces 100% identical outputs to the target VM (and matching all golden `.expected.txt` files), the compiler architecture ensures that any discrepancy observed in later phases (Phase 6 optimization or Phase 7 code generation) is immediately identifiable as an optimization or codegen bug rather than a language semantics bug.
+3. **Q: How does Vela handle array memory and parameters during TAC execution?**
+   **A:** In Vela, arrays are fixed-size buffers allocated on the heap or frame via `ALLOC_ARRAY`. Array parameters are passed by reference (`name: int[]`). In the interpreter, passing an array passes the reference to the underlying Python list object, allowing in-place mutations (e.g. in sorting or accumulation routines) to affect the caller's array directly, fulfilling the by-reference requirement without pointer arithmetic.

@@ -1,0 +1,5 @@
+func main() {
+    let d: int;
+    read d;
+    show 10 / d;
+}

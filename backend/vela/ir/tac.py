@@ -149,6 +149,10 @@ class TACInstruction:
             return f"{res} = {a1}[{a2}]"
         if op == "ARRAY_SET":
             return f"{a1}[{a2}] = {res}"
+        if op == "ALLOC_ARRAY":
+            return f"alloc_array {res}, {a1}, {a2}"
+        if op == "RECEIVE":
+            return f"receive {res}"
         if op == "CAST":
             return f"{res} = cast({a1}, {a2})"
         if op == "SHOW":
