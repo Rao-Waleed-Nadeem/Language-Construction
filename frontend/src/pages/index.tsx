@@ -5,7 +5,7 @@ export { DashboardPage } from './DashboardPage';
 export { PlaygroundPage } from './PlaygroundPage';
 export { LexerPage } from './LexerPage';
 export { ParserPage } from './ParserPage';
-export const GrammarLabPage: React.FC = () => <EmptyState title="Grammar Lab" description="Grammar analysis & parsing lab" />;
+export { GrammarLabPage } from './GrammarLabPage';
 export const SemanticPage: React.FC = () => <EmptyState title="Semantic Analysis" description="Type checks & symbol tables" />;
 export const TreesPage: React.FC = () => <EmptyState title="AST & DAG" description="Abstract syntax tree & expression DAG" />;
 export const IRPage: React.FC = () => <EmptyState title="Intermediate Code" description="TAC, blocks & control flow graph" />;
