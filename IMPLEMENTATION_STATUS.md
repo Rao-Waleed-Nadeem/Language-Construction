@@ -111,6 +111,9 @@ Last updated: 2026-11-21   Run #: 1
 | P6-10 | Global optimization: data-flow framework | SATISFIED | `opt/dataflow.py` forward & backward worklist solver, reaching defs, liveness, available exprs/copies, iteration logs |
 | P6-12 | Comparison of original vs optimized code | SATISFIED | `opt/pipeline.py` recording before/after diffs, change records, and reduction metrics |
 | P6-13 | (project goal) Optimizations preserve behavior | SATISFIED | `opt/validate.py` with well-formedness checks and oracle equivalence on all examples & invalid runs |
+| P7-01 | Design a target instruction set | SATISFIED | `codegen/isa.py` with 8 registers (R0-R7), SP, FP, PC, flags, memory displacement |
+| P7-02 | Instruction selection | SATISFIED | `codegen/selector.py` mapping TAC quadruples to target instructions with rule provenance |
+| P7-03 | Instruction cost calculation | SATISFIED | `codegen/cost.py` with base opcode costs, memory access penalties, and AC-C2 total cost sum |
 
 ## Known limitations
 None yet.
@@ -138,4 +141,5 @@ None.
   - M5-T2: TAC interpreter oracle complete (`vela.ir.interpreter`). 139 tests passing. Milestone M5 complete!
   - M6-T1: Basic blocks, CFG, dominators, and natural loop detection complete (`vela.opt.blocks`, `cfg`, `dominators`). 143 tests passing.
   - M6-T2: Data-flow analysis framework complete (`vela.opt.dataflow` for reaching definitions, live variables, available expressions, available copies). 147 tests passing.
-  - M6-T3: Optimization passes and pipeline complete (`vela.opt.passes.*`, `pipeline`, `validate`). 154 tests passing. Milestone M6 complete! Next: Milestone M7 (Target Code and Virtual Machine).
+  - M6-T3: Optimization passes and pipeline complete (`vela.opt.passes.*`, `pipeline`, `validate`). 154 tests passing. Milestone M6 complete!
+  - M7-T1: Target ISA, instruction selection, and cost model complete (`vela.codegen.isa`, `cost`, `selector`). 158 tests passing. Next: M7-T2.
