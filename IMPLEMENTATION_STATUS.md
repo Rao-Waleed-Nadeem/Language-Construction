@@ -14,7 +14,7 @@ Last updated: 2026-11-21   Run #: 1
 | M2-T4 | LR family | DONE | `powershell -File .\scripts\test.ps1` → 51 passed; reproduces all golden metrics: vela.bnf LR(0)=214, SLR(1)=214/0, LALR(1)=214/0, CLR(1)=609/0; presets verified | 2026-11-21 | LRBuilder, ShiftReduceParser, OperatorPrecedenceTable |
 | M3-T1 | AST nodes | DONE | `powershell -File .\scripts\test.ps1` → 55 passed; verifies all AST node types, spans, ImplicitCast, and S-expression/JSON serialization | 2026-11-21 | ASTNode hierarchy, ASTPrinter |
 | M3-T2 | Recursive-descent parser | DONE | `powershell -File .\scripts\test.ps1` → 69 passed; verifies all 10 examples, INV-SYN-01..08, nesting limit VL-SYN-003, and differential testing with SLR(1) | 2026-11-21 | RecursiveDescentParser, PanicModeRecovery, CST, differential testing |
-| M4-T1 | Types and symbols | TODO | | | |
+| M4-T1 | Types and symbols | DONE | `powershell -File .\scripts\test.ps1` → 76 passed; verifies scopes, shadowing, redeclaration in same scope, use tracking, all-paths return analysis, type conversions & operator typing | 2026-11-21 | types.py, symbols.py, returns.py |
 | M4-T2 | Checker | TODO | | | |
 | M4-T3 | SDD/SDT engine | TODO | | | |
 | M4-T4 | Expression DAG | TODO | | | |
@@ -79,6 +79,9 @@ Last updated: 2026-11-21   Run #: 1
 | P3-01 | Recursive-descent parser | SATISFIED | `RecursiveDescentParser` implementing G' with CST and call trace in `backend/vela/parser/` |
 | P3-02 | Syntactic error recovery | SATISFIED | `PanicModeRecovery` handles INV-SYN-01..08, multiple errors in one pass (INV-SYN-08) |
 | P1-01 | Top-down and bottom-up parsing comparison | SATISFIED | Differential testing in `test_parser.py` proves RD and SLR(1) agreement on examples & mutations |
+| P4-04 | Symbol table operations | SATISFIED | `SymbolTable`, `Scope`, `Symbol` with offsets, uses, attributes in `vela.semantic.symbols` |
+| P4-05 | Scope resolution and shadowing | SATISFIED | Block, function, for-header, case scopes with shadowing detection and event logs |
+| P4-06 | Type checking mechanism | SATISFIED | `vela.semantic.types` tables, operator typing, assignment rules, implicit/explicit conversions |
 
 ## Known limitations
 None yet.
@@ -97,4 +100,5 @@ None.
   - M2-T3: LL(1) tools complete (`vela.grammar.ll1`, `rdgen`). 42 tests passing.
   - M2-T4: LR family and operator precedence complete (`vela.grammar.lr`, `shift_reduce`, `op_precedence`). 51 tests passing. Milestone M2 complete.
   - M3-T1: AST nodes and serialization complete (`vela.ast.nodes`, `printer`). 55 tests passing.
-  - M3-T2: Recursive-descent parser complete (`vela.parser.recursive_descent`, `parse_tree`, `recovery`). 69 tests passing. Milestone M3 complete. Next: M4-T1.
+  - M3-T2: Recursive-descent parser complete (`vela.parser.recursive_descent`, `parse_tree`, `recovery`). 69 tests passing. Milestone M3 complete.
+  - M4-T1: Types, symbols, scopes, return-path analysis complete (`vela.semantic.types`, `symbols`, `returns`). 76 tests passing. Next: M4-T2.
