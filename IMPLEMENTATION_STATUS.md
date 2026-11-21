@@ -8,7 +8,7 @@ Last updated: 2026-11-21   Run #: 1
 | M0-T2 | Common foundations | DONE | `powershell -File .\scripts\test.ps1` → 8 passed; covers normalization, line/col conversion, all 47 diagnostic codes | 2026-11-21 | SourceFile, Span, Diagnostic, Limits, Budget |
 | M1-T1 | Language tables | DONE | `powershell -File .\scripts\test.ps1` → 15 passed; asserts exactly 26 keywords, operators, delimiters, precedence, regexes | 2026-11-21 | spec.py single source of truth |
 | M1-T2 | DFA, buffer, scanner | DONE | `powershell -File .\scripts\test.ps1` → 27 passed; verifies all token classes, longest match, buffer refill, INV-LEX-01..07, 10/10 examples | 2026-11-21 | DFA-driven scanner, InputBuffer, maximal munch |
-| M2-T1 | Model, loader, analysis | TODO | | | |
+| M2-T1 | Model, loader, analysis | DONE | `powershell -File .\scripts\test.ps1` → 33 passed; loads 13/13 .bnf files, FOLLOW(IfStmt) has no else, AP-5 grammar-lexer consistency | 2026-11-21 | BNFLoader, GrammarAnalysis, ChomskyClassifier |
 | M2-T2 | Transformations | TODO | | | |
 | M2-T3 | LL(1) tools | TODO | | | |
 | M2-T4 | LR family | TODO | | | |
@@ -59,6 +59,11 @@ Last updated: 2026-11-21   Run #: 1
 | P2-06 | Handle lexical errors | SATISFIED | `test_inv_lex_01` through `07` assert exact codes/positions |
 | P2-07 | Output keyword (show) recognized as reserved token | SATISFIED | `test_keyword_vs_identifier` asserts show=KEYWORD, shown=ID |
 | P2-08 | Scanner implemented manually with explicit DFAs | SATISFIED | Hand-written `Scanner` with `NumberDFA`, `IdentifierDFA`, `OperatorDFA` |
+| PR-04 | Compiler built according to language grammar and rules | SATISFIED | `test_grammar_lexer_consistency.py` verifies AP-5 terminal equivalence |
+| P1-04 | Formal grammar productions in BNF | SATISFIED | `BNFLoader` verifies golden values for `vela.bnf` (121/47/59) and `vela_ll1.bnf` (138/65/59) |
+| P1-06 | Identify and resolve grammar ambiguities | SATISFIED | Mandatory braces proven: `FOLLOW(IfStmt)` contains no `else` |
+| P1-07 | Classify grammar in Chomsky hierarchy with justification | SATISFIED | `classify_grammar` identifies Type 2 (Context-Free) with detailed reason |
+| P3-04 | FIRST and FOLLOW sets | SATISFIED | `GrammarAnalysis` fixed-point computation with step logs |
 
 ## Known limitations
 None yet.
@@ -71,4 +76,5 @@ None.
   - M0-T1: Workspace skeleton and tooling complete.
   - M0-T2: Common foundations complete (`vela.common.source`, `diagnostics`, `limits`, `budget`). 8 unit tests passing. Milestone M0 complete.
   - M1-T1: Language tables complete (`vela.language.spec`). 15 unit tests passing.
-  - M1-T2: Scanner, buffer, DFA simulator complete (`vela.lexer.tokens`, `buffer`, `fsm`, `scanner`). 27 tests passing. Milestone M1 complete. Next: M2-T1.
+  - M1-T2: Scanner, buffer, DFA simulator complete (`vela.lexer.tokens`, `buffer`, `fsm`, `scanner`). 27 tests passing. Milestone M1 complete.
+  - M2-T1: Grammar engine model, loader, analysis, Chomsky classifier complete (`vela.grammar.model`, `loader`, `analysis`, `classify`). 33 tests passing. Next: M2-T2.
