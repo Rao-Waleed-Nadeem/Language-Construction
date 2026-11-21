@@ -109,11 +109,15 @@ Last updated: 2026-11-21   Run #: 1
 | P6-08 | Copy propagation | SATISFIED | `opt/passes/copy_prop.py` with available copies propagation |
 | P6-09 | Loop optimization | SATISFIED | `opt/passes/licm.py` and `strength.py` with natural loop hoisting and multiplication reduction |
 | P6-10 | Global optimization: data-flow framework | SATISFIED | `opt/dataflow.py` forward & backward worklist solver, reaching defs, liveness, available exprs/copies, iteration logs |
+| P6-11 | Machine-dependent optimization | SATISFIED | `codegen/peephole.py` with sliding window patterns for loads, moves, and jumps |
 | P6-12 | Comparison of original vs optimized code | SATISFIED | `opt/pipeline.py` recording before/after diffs, change records, and reduction metrics |
 | P6-13 | (project goal) Optimizations preserve behavior | SATISFIED | `opt/validate.py` with well-formedness checks and oracle equivalence on all examples & invalid runs |
 | P7-01 | Design a target instruction set | SATISFIED | `codegen/isa.py` with 8 registers (R0-R7), SP, FP, PC, flags, memory displacement |
 | P7-02 | Instruction selection | SATISFIED | `codegen/selector.py` mapping TAC quadruples to target instructions with rule provenance |
 | P7-03 | Instruction cost calculation | SATISFIED | `codegen/cost.py` with base opcode costs, memory access penalties, and AC-C2 total cost sum |
+| P7-04 | Register allocation | SATISFIED | `codegen/regalloc.py` with Algorithm 8.7 getReg, descriptors, spills, AC-C3, AC-C4 |
+| P7-05 | Assign registers to temporary variables | SATISFIED | `codegen/regalloc.py` temp_to_location mapping to physical registers or stack slots |
+| P7-06 | DAG-based code generation | SATISFIED | `codegen/dag_codegen.py` with Ershov optimal numbering, AC-C5 (DAG cost <= linear cost) |
 
 ## Known limitations
 None yet.
@@ -142,4 +146,5 @@ None.
   - M6-T1: Basic blocks, CFG, dominators, and natural loop detection complete (`vela.opt.blocks`, `cfg`, `dominators`). 143 tests passing.
   - M6-T2: Data-flow analysis framework complete (`vela.opt.dataflow` for reaching definitions, live variables, available expressions, available copies). 147 tests passing.
   - M6-T3: Optimization passes and pipeline complete (`vela.opt.passes.*`, `pipeline`, `validate`). 154 tests passing. Milestone M6 complete!
-  - M7-T1: Target ISA, instruction selection, and cost model complete (`vela.codegen.isa`, `cost`, `selector`). 158 tests passing. Next: M7-T2.
+  - M7-T1: Target ISA, instruction selection, and cost model complete (`vela.codegen.isa`, `cost`, `selector`). 158 tests passing.
+  - M7-T2: Register allocation, DAG code generation, and peephole optimization complete (`vela.codegen.regalloc`, `dag_codegen`, `peephole`). 162 tests passing. Next: M7-T3.
