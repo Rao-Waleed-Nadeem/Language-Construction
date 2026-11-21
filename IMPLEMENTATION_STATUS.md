@@ -4,7 +4,7 @@ Last updated: 2026-11-21   Run #: 1
 ## Task table
 | ID | Task | Status | Verified by (command → result) | Date | Notes |
 |----|------|--------|--------------------------------|------|-------|
-| M0-T1 | Skeleton and tooling | IN_PROGRESS | | 2026-11-21 | Initial setup |
+| M0-T1 | Skeleton and tooling | DONE | `powershell -File .\scripts\test.ps1` → 2 passed, ruff clean, tsc clean; `npm run build` → exit 0; pure import OK | 2026-11-21 | Workspace, backend venv, frontend, scripts |
 | M0-T2 | Common foundations | TODO | | | |
 | M1-T1 | Language tables | TODO | | | |
 | M1-T2 | DFA, buffer, scanner | TODO | | | |
@@ -50,4 +50,4 @@ None yet.
 None.
 
 ## Run log
-- **Run #1 (2026-11-21):** Started project implementation from agent prompt. Setting up workspace skeleton and tooling (M0-T1).
+- **Run #1 (2026-11-21):** Started project implementation from agent prompt. M0-T1 completed and verified (workspace skeleton, backend virtual environment, dependencies lock, Vite/React/TS frontend scaffold, automation scripts, and test suite). Next task: M0-T2.
