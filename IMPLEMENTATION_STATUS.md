@@ -99,6 +99,8 @@ Last updated: 2026-11-21   Run #: 1
 | P5-10 | Function definitions and calls | SATISFIED | `FUNC_BEGIN`, `PARAM`, `CALL`, `RETURN`, `FUNC_END` calling convention |
 | P5-11 | Array operations | SATISFIED | `ARRAY_GET` and `ARRAY_SET` index operations |
 | P5-12 | (project goal) TAC interpreter as an independent oracle | SATISFIED | `ir/interpreter.py` executing TAC with exact runtime semantics, oracle for all 10 examples and invalid runs |
+| P6-01 | Basic block identification | SATISFIED | `opt/blocks.py` with Algorithm 8.5 leader rules and reasons |
+| P6-02 | Control-flow graph construction | SATISFIED | `opt/cfg.py`, `dominators.py` with CFG edges, dominator trees, back edges, natural loops |
 
 ## Known limitations
 None yet.
@@ -123,4 +125,5 @@ None.
   - M4-T3: SDD/SDT engine complete (`vela.semantic.sdd`). 104 tests passing.
   - M4-T4: Expression DAG complete (`vela.ast.dag`). 111 tests passing. Milestone M4 complete!
   - M5-T1: TAC model and generator complete (`vela.ir.tac`, `generator`, `printer`). 120 tests passing.
-  - M5-T2: TAC interpreter oracle complete (`vela.ir.interpreter`). 139 tests passing. Milestone M5 complete! Next: M6-T1.
+  - M5-T2: TAC interpreter oracle complete (`vela.ir.interpreter`). 139 tests passing. Milestone M5 complete!
+  - M6-T1: Basic blocks, CFG, dominators, and natural loop detection complete (`vela.opt.blocks`, `cfg`, `dominators`). 143 tests passing. Next: M6-T2.
