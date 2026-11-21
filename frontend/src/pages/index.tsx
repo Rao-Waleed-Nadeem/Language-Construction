@@ -1,8 +1,8 @@
 import React from 'react';
 import { EmptyState } from '../components/common/Feedback';
 
-export const DashboardPage: React.FC = () => <EmptyState title="Dashboard" description="Overview & quickstart" />;
-export const PlaygroundPage: React.FC = () => <EmptyState title="Playground" description="Code editor & console" />;
+export { DashboardPage } from './DashboardPage';
+export { PlaygroundPage } from './PlaygroundPage';
 export const LexerPage: React.FC = () => <EmptyState title="Lexer Explorer" description="Tokens, DFAs & scanner" />;
 export const ParserPage: React.FC = () => <EmptyState title="Parser Explorer" description="LL(1) parse tree & trace" />;
 export const GrammarLabPage: React.FC = () => <EmptyState title="Grammar Lab" description="Grammar analysis & parsing lab" />;
