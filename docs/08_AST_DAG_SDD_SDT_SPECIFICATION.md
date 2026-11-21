@@ -44,3 +44,31 @@ The AST discards concrete syntax details (delimiters, parentheses) and captures 
 ## 2. AST Serialization & Pretty-Printing
 - S-expression format: e.g. `(Program (FuncDecl main () (Block ...)))`.
 - JSON-ready dictionary representation for frontend visualization.
+
+
+---
+
+## 3. Syntax-Directed Definition (SDD) and Translation (SDT) Engine
+
+### 3.1 Overview and Safety
+The SDD/SDT engine evaluates attribute grammars over parse trees without executing arbitrary code (`eval` or `exec` are strictly prohibited per AP-1 and academic safety guidelines). Rules are parsed using an AST-based safe expression evaluator restricted to arithmetic, string concatenation, comparisons, whitelisted functions, and attribute references.
+
+### 3.2 Attribute Classification
+- **Synthesized attributes**: Defined for the production head $A$ in $A \to X_1 \dots X_n$, depending on attributes of children $X_i$ or other attributes of $A$.
+- **Inherited attributes**: Defined for a child symbol $X_i$ on the RHS, depending on parent $A$'s attributes or sibling attributes.
+- **S-Attributed**: An SDD is S-attributed iff all attributes are synthesized.
+- **L-Attributed**: An SDD is L-attributed iff every inherited attribute $X_i.a$ depends only on:
+  1. Inherited attributes of the parent $A$.
+  2. Attributes of symbols $X_1 \dots X_{i-1}$ strictly to the left of $X_i$ on the RHS.
+  Any rule where $X_i.a$ depends on a right sibling $X_j$ ($j > i$) or a synthesized attribute of $A$ violates the L-attributed condition and is reported naming the exact violating rule.
+
+### 3.3 Dependency Graph and Evaluation Order
+- Nodes in the dependency graph represent pairs `(tree_node_id, attribute_name)`.
+- Directed edges represent data dependencies: $u \to v$ if attribute $v$ requires attribute $u$.
+- Evaluation order is computed via topological sort ($O(V + E)$). Cycles indicate circular definitions.
+
+### 3.4 Presets
+1. **Desk Calculator**: S-attributed arithmetic expression evaluation.
+2. **Type Declarations**: L-attributed type propagation distributing type from $T$ to list $L$.
+3. **Boolean Expression Labels**: Inherited and synthesized short-circuit flow labels.
+4. **Vela Expression Typing**: Bottom-up type determination and widening.

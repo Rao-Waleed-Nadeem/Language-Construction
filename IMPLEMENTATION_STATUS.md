@@ -16,7 +16,7 @@ Last updated: 2026-11-21   Run #: 1
 | M3-T2 | Recursive-descent parser | DONE | `powershell -File .\scripts\test.ps1` → 69 passed; verifies all 10 examples, INV-SYN-01..08, nesting limit VL-SYN-003, and differential testing with SLR(1) | 2026-11-21 | RecursiveDescentParser, PanicModeRecovery, CST, differential testing |
 | M4-T1 | Types and symbols | DONE | `powershell -File .\scripts\test.ps1` → 76 passed; verifies scopes, shadowing, redeclaration in same scope, use tracking, all-paths return analysis, type conversions & operator typing | 2026-11-21 | types.py, symbols.py, returns.py |
 | M4-T2 | Checker | DONE | `powershell -File .\scripts\test.ps1` → 98 passed; verifies INV-SEM-01..19 exact codes/positions, all 10 examples pass cleanly, conversion table, implicit casts | 2026-11-21 | SemanticChecker in checker.py |
-| M4-T3 | SDD/SDT engine | TODO | | | |
+| M4-T3 | SDD/SDT engine | DONE | `powershell -File .\scripts\test.ps1` → 104 passed; verifies S-attributed & L-attributed classification, safe evaluator, cycle detection, right-sibling dependency detection, 4 presets | 2026-11-21 | SDDEngine, SafeSDDEvaluator, classifier, presets |
 | M4-T4 | Expression DAG | TODO | | | |
 | M5-T1 | TAC model and generator | TODO | | | |
 | M5-T2 | TAC interpreter (oracle) | TODO | | | |
@@ -84,6 +84,8 @@ Last updated: 2026-11-21   Run #: 1
 | P4-06 | Type checking mechanism | SATISFIED | `vela.semantic.types` tables, operator typing, assignment rules, implicit/explicit conversions |
 | P4-02 | Semantic error handling | SATISFIED | `SemanticChecker` handles INV-SEM-01..19, array bounds, duplicate labels, missing main |
 | P4-03 | Type checking and semantic validation | SATISFIED | Full semantic validation, operator typing (+ overload), void misuse (VL-SEM-023), ImplicitCast |
+| P4-07 | Syntax-Directed Definitions (SDD) | SATISFIED | S-attributed and L-attributed classification, dependency graph, topological evaluation, 4 presets |
+| P4-08 | Syntax-Directed Translation (SDT) | SATISFIED | SDD/SDT execution engine with cycle detection and safe evaluator |
 
 ## Known limitations
 None yet.
@@ -104,4 +106,5 @@ None.
   - M3-T1: AST nodes and serialization complete (`vela.ast.nodes`, `printer`). 55 tests passing.
   - M3-T2: Recursive-descent parser complete (`vela.parser.recursive_descent`, `parse_tree`, `recovery`). 69 tests passing. Milestone M3 complete.
   - M4-T1: Types, symbols, scopes, return-path analysis complete (`vela.semantic.types`, `symbols`, `returns`). 76 tests passing.
-  - M4-T2: Checker complete (`vela.semantic.checker`). 98 tests passing. Next: M4-T3.
+  - M4-T2: Checker complete (`vela.semantic.checker`). 98 tests passing.
+  - M4-T3: SDD/SDT engine complete (`vela.semantic.sdd`). 104 tests passing. Next: M4-T4.
