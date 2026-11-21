@@ -4,11 +4,64 @@
 
 :root {
   color-scheme: dark;
+
+  /* Theme color tokens per doc 03 §2.1 */
+  --bg-0: #0b0e14;
+  --bg-1: #11151d;
+  --bg-2: #171c27;
+  --border: #252c3a;
+  --text-0: #e6e9ef;
+  --text-1: #9aa4b5;
+  --accent: #5eead4;
+  --ok: #4ade80;
+  --warn: #fbbf24;
+  --err: #f87171;
+  --sel: rgba(94, 234, 212, 0.18);
+
+  /* Compiler phase colors per doc 03 §2.1 */
+  --phase-lexer: #60a5fa;
+  --phase-parser: #a78bfa;
+  --phase-semantic: #f472b6;
+  --phase-ir: #fb923c;
+  --phase-optimizer: #facc15;
+  --phase-codegen: #34d399;
+  --phase-vm: #22d3ee;
 }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background-color: #0d1117;
-  color: #c9d1d9;
+  padding: 0;
+  background-color: var(--bg-0);
+  color: var(--text-0);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  user-select: none;
+}
+
+code, pre, kbd, samp {
+  font-family: 'JetBrains Mono', Consolas, Monaco, 'Courier New', Courier, monospace;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-0);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-1);
+}
+
+/* Focus outline */
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }

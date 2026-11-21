@@ -1,0 +1,2056 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Vela Studio API",
+    "description": "Compiler Construction workbench and educational tool API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/language": {
+      "get": {
+        "tags": [
+          "compiler"
+        ],
+        "summary": "Get Language Spec",
+        "description": "Return complete language specification tables and BNF grammars.",
+        "operationId": "get_language_spec_api_language_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LanguageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/examples": {
+      "get": {
+        "tags": [
+          "compiler"
+        ],
+        "summary": "List Examples",
+        "description": "List all bundled language example programs.",
+        "operationId": "list_examples_api_examples_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ExampleItem"
+                  },
+                  "type": "array",
+                  "title": "Response List Examples Api Examples Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/examples/{example_id}": {
+      "get": {
+        "tags": [
+          "compiler"
+        ],
+        "summary": "Get Example",
+        "description": "Return single example program with source code, stdin, and expected output.",
+        "operationId": "get_example_api_examples__example_id__get",
+        "parameters": [
+          {
+            "name": "example_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Example Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExampleDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/compile": {
+      "post": {
+        "tags": [
+          "compiler"
+        ],
+        "summary": "Compile Endpoint",
+        "description": "Execute complete phase-gated compilation pipeline.",
+        "operationId": "compile_endpoint_api_compile_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompileResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/run": {
+      "post": {
+        "tags": [
+          "compiler"
+        ],
+        "summary": "Run Endpoint",
+        "description": "Compile and execute program on Virtual Machine (or TAC oracle).",
+        "operationId": "run_endpoint_api_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/verify": {
+      "post": {
+        "tags": [
+          "compiler"
+        ],
+        "summary": "Verify Endpoint",
+        "description": "Tri-way execution equivalence verification across O0 oracle, O1 oracle, and Target VM.",
+        "operationId": "verify_endpoint_api_verify_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/selftest": {
+      "get": {
+        "tags": [
+          "compiler"
+        ],
+        "summary": "Selftest Endpoint",
+        "description": "Run comprehensive self-test over all bundled programs and sidecars.",
+        "operationId": "selftest_endpoint_api_selftest_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SelfTestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/grammar/presets": {
+      "get": {
+        "tags": [
+          "grammar"
+        ],
+        "summary": "List Grammar Presets",
+        "description": "List all available educational grammar presets.",
+        "operationId": "list_grammar_presets_api_grammar_presets_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/GrammarPresetItem"
+                  },
+                  "type": "array",
+                  "title": "Response List Grammar Presets Api Grammar Presets Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/grammar/presets/{preset_id}": {
+      "get": {
+        "tags": [
+          "grammar"
+        ],
+        "summary": "Get Grammar Preset",
+        "description": "Return single grammar preset text and metadata.",
+        "operationId": "get_grammar_preset_api_grammar_presets__preset_id__get",
+        "parameters": [
+          {
+            "name": "preset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Preset Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GrammarPresetDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/grammar/analyze": {
+      "post": {
+        "tags": [
+          "grammar"
+        ],
+        "summary": "Analyze Grammar",
+        "description": "Compute nullable, FIRST, and FOLLOW sets, plus Chomsky classification.",
+        "operationId": "analyze_grammar_api_grammar_analyze_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrammarAnalyzeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GrammarAnalyzeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/grammar/transform": {
+      "post": {
+        "tags": [
+          "grammar"
+        ],
+        "summary": "Transform Grammar",
+        "description": "Eliminate left recursion and/or left factor grammar productions.",
+        "operationId": "transform_grammar_api_grammar_transform_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrammarTransformRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GrammarTransformResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/grammar/ll1": {
+      "post": {
+        "tags": [
+          "grammar"
+        ],
+        "summary": "Ll1 Grammar",
+        "description": "Build LL(1) parsing table, detect conflicts, and simulate parse trace.",
+        "operationId": "ll1_grammar_api_grammar_ll1_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrammarLL1Request"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GrammarLL1Response"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/grammar/lr": {
+      "post": {
+        "tags": [
+          "grammar"
+        ],
+        "summary": "Lr Grammar",
+        "description": "Construct LR(0), SLR(1), CLR(1), or LALR(1) automaton and parse tables.",
+        "operationId": "lr_grammar_api_grammar_lr_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrammarLRRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GrammarLRResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/grammar/op-precedence": {
+      "post": {
+        "tags": [
+          "grammar"
+        ],
+        "summary": "Op Precedence Grammar",
+        "description": "Compute operator precedence relations and detect ambiguity conflicts.",
+        "operationId": "op_precedence_grammar_api_grammar_op_precedence_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrammarOpPrecedenceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GrammarOpPrecedenceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/grammar/rd-pseudocode": {
+      "post": {
+        "tags": [
+          "grammar"
+        ],
+        "summary": "Rd Pseudocode Grammar",
+        "description": "Generate recursive-descent parser pseudocode from grammar.",
+        "operationId": "rd_pseudocode_grammar_api_grammar_rd_pseudocode_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrammarRDPseudocodeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GrammarRDPseudocodeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sdd/evaluate": {
+      "post": {
+        "tags": [
+          "grammar"
+        ],
+        "summary": "Evaluate Sdd",
+        "description": "Evaluate Syntax-Directed Definition (SDD) and classify S/L-attributed.",
+        "operationId": "evaluate_sdd_api_sdd_evaluate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SDDEvaluateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SDDEvaluateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/docs": {
+      "get": {
+        "tags": [
+          "docs"
+        ],
+        "summary": "List Docs",
+        "description": "List all available documentation specification markdown files.",
+        "operationId": "list_docs_api_docs_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "title": "Response List Docs Api Docs Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/docs/{name}": {
+      "get": {
+        "tags": [
+          "docs"
+        ],
+        "summary": "Get Doc",
+        "description": "Serve markdown text of a specific documentation file.",
+        "operationId": "get_doc_api_docs__name__get",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{full_path}": {
+      "get": {
+        "summary": "Serve Spa",
+        "operationId": "serve_spa__full_path__get",
+        "parameters": [
+          {
+            "name": "full_path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Full Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CompileRequest": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "maxLength": 100000,
+            "title": "Source",
+            "description": "Vela source code (max 100k chars)"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename",
+            "default": "main.vela"
+          },
+          "optimize": {
+            "type": "boolean",
+            "title": "Optimize",
+            "default": true
+          },
+          "opt_level": {
+            "type": "integer",
+            "title": "Opt Level",
+            "default": 1
+          },
+          "max_opt_iterations": {
+            "type": "integer",
+            "title": "Max Opt Iterations",
+            "default": 10
+          },
+          "stop_after_phase": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stop After Phase"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source"
+        ],
+        "title": "CompileRequest"
+      },
+      "CompileResponse": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "source_hash": {
+            "type": "string",
+            "title": "Source Hash"
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "halted_at_phase": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Halted At Phase"
+          },
+          "timings_ms": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Timings Ms"
+          },
+          "diagnostics": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Diagnostics"
+          },
+          "tokens": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tokens"
+          },
+          "tokens_count": {
+            "type": "integer",
+            "title": "Tokens Count",
+            "default": 0
+          },
+          "ast": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ast"
+          },
+          "cst": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cst"
+          },
+          "semantic": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Semantic"
+          },
+          "tac": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tac"
+          },
+          "blocks": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blocks"
+          },
+          "cfg": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cfg"
+          },
+          "optimized_tac": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Optimized Tac"
+          },
+          "opt_passes": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opt Passes"
+          },
+          "target_unallocated": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Unallocated"
+          },
+          "target_program": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Program"
+          },
+          "register_allocation": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Register Allocation"
+          },
+          "peephole_changes": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Peephole Changes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "filename",
+          "source_hash",
+          "success",
+          "timings_ms",
+          "diagnostics"
+        ],
+        "title": "CompileResponse"
+      },
+      "DocDetail": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "title",
+          "content"
+        ],
+        "title": "DocDetail"
+      },
+      "ExampleDetail": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "stdin": {
+            "type": "string",
+            "title": "Stdin",
+            "default": ""
+          },
+          "expected_output": {
+            "type": "string",
+            "title": "Expected Output",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "filename",
+          "source"
+        ],
+        "title": "ExampleDetail"
+      },
+      "ExampleItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "filename"
+        ],
+        "title": "ExampleItem"
+      },
+      "GrammarAnalyzeRequest": {
+        "properties": {
+          "grammar_text": {
+            "type": "string",
+            "title": "Grammar Text"
+          },
+          "start_symbol": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Symbol"
+          }
+        },
+        "type": "object",
+        "required": [
+          "grammar_text"
+        ],
+        "title": "GrammarAnalyzeRequest"
+      },
+      "GrammarAnalyzeResponse": {
+        "properties": {
+          "nullable": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Nullable"
+          },
+          "first": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "First"
+          },
+          "follow": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Follow"
+          },
+          "classification": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Classification"
+          },
+          "steps": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Steps"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nullable",
+          "first",
+          "follow",
+          "classification"
+        ],
+        "title": "GrammarAnalyzeResponse"
+      },
+      "GrammarLL1Request": {
+        "properties": {
+          "grammar_text": {
+            "type": "string",
+            "title": "Grammar Text"
+          },
+          "start_symbol": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Symbol"
+          },
+          "input_string": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input String"
+          }
+        },
+        "type": "object",
+        "required": [
+          "grammar_text"
+        ],
+        "title": "GrammarLL1Request"
+      },
+      "GrammarLL1Response": {
+        "properties": {
+          "is_ll1": {
+            "type": "boolean",
+            "title": "Is Ll1"
+          },
+          "table": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Table"
+          },
+          "conflicts": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Conflicts"
+          },
+          "parse_trace": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parse Trace"
+          }
+        },
+        "type": "object",
+        "required": [
+          "is_ll1",
+          "table"
+        ],
+        "title": "GrammarLL1Response"
+      },
+      "GrammarLRRequest": {
+        "properties": {
+          "grammar_text": {
+            "type": "string",
+            "title": "Grammar Text"
+          },
+          "variant": {
+            "type": "string",
+            "title": "Variant",
+            "default": "slr1"
+          },
+          "precedence_declarations": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Precedence Declarations"
+          },
+          "input_string": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input String"
+          }
+        },
+        "type": "object",
+        "required": [
+          "grammar_text"
+        ],
+        "title": "GrammarLRRequest"
+      },
+      "GrammarLRResponse": {
+        "properties": {
+          "variant": {
+            "type": "string",
+            "title": "Variant"
+          },
+          "states_count": {
+            "type": "integer",
+            "title": "States Count"
+          },
+          "is_conflict_free": {
+            "type": "boolean",
+            "title": "Is Conflict Free"
+          },
+          "action_table": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Action Table"
+          },
+          "goto_table": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "integer"
+              },
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Goto Table"
+          },
+          "conflicts": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Conflicts"
+          },
+          "states": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "States"
+          },
+          "parse_trace": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parse Trace"
+          }
+        },
+        "type": "object",
+        "required": [
+          "variant",
+          "states_count",
+          "is_conflict_free",
+          "action_table",
+          "goto_table"
+        ],
+        "title": "GrammarLRResponse"
+      },
+      "GrammarOpPrecedenceRequest": {
+        "properties": {
+          "grammar_text": {
+            "type": "string",
+            "title": "Grammar Text"
+          },
+          "input_string": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input String"
+          }
+        },
+        "type": "object",
+        "required": [
+          "grammar_text"
+        ],
+        "title": "GrammarOpPrecedenceRequest"
+      },
+      "GrammarOpPrecedenceResponse": {
+        "properties": {
+          "is_operator_grammar": {
+            "type": "boolean",
+            "title": "Is Operator Grammar"
+          },
+          "leading": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Leading"
+          },
+          "trailing": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Trailing"
+          },
+          "relations": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Relations"
+          },
+          "conflicts": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Conflicts"
+          },
+          "parse_trace": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parse Trace"
+          }
+        },
+        "type": "object",
+        "required": [
+          "is_operator_grammar",
+          "leading",
+          "trailing",
+          "relations"
+        ],
+        "title": "GrammarOpPrecedenceResponse"
+      },
+      "GrammarPresetDetail": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "bnf_text": {
+            "type": "string",
+            "title": "Bnf Text"
+          },
+          "start_symbol": {
+            "type": "string",
+            "title": "Start Symbol",
+            "default": "Program"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "bnf_text"
+        ],
+        "title": "GrammarPresetDetail"
+      },
+      "GrammarPresetItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "GrammarPresetItem"
+      },
+      "GrammarRDPseudocodeRequest": {
+        "properties": {
+          "grammar_text": {
+            "type": "string",
+            "title": "Grammar Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "grammar_text"
+        ],
+        "title": "GrammarRDPseudocodeRequest"
+      },
+      "GrammarRDPseudocodeResponse": {
+        "properties": {
+          "pseudocode": {
+            "type": "string",
+            "title": "Pseudocode"
+          },
+          "functions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Functions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "pseudocode"
+        ],
+        "title": "GrammarRDPseudocodeResponse"
+      },
+      "GrammarTransformRequest": {
+        "properties": {
+          "grammar_text": {
+            "type": "string",
+            "title": "Grammar Text"
+          },
+          "transform_type": {
+            "type": "string",
+            "title": "Transform Type",
+            "default": "both"
+          }
+        },
+        "type": "object",
+        "required": [
+          "grammar_text"
+        ],
+        "title": "GrammarTransformRequest"
+      },
+      "GrammarTransformResponse": {
+        "properties": {
+          "original_bnf": {
+            "type": "string",
+            "title": "Original Bnf"
+          },
+          "transformed_bnf": {
+            "type": "string",
+            "title": "Transformed Bnf"
+          },
+          "steps": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Steps"
+          }
+        },
+        "type": "object",
+        "required": [
+          "original_bnf",
+          "transformed_bnf"
+        ],
+        "title": "GrammarTransformResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "LanguageResponse": {
+        "properties": {
+          "keywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Keywords"
+          },
+          "operators": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Operators"
+          },
+          "delimiters": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Delimiters"
+          },
+          "precedence": {
+            "items": {
+              "$ref": "#/components/schemas/PrecedenceLevel"
+            },
+            "type": "array",
+            "title": "Precedence"
+          },
+          "types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Types"
+          },
+          "grammar": {
+            "type": "string",
+            "title": "Grammar"
+          },
+          "grammar_ll1": {
+            "type": "string",
+            "title": "Grammar Ll1"
+          }
+        },
+        "type": "object",
+        "required": [
+          "keywords",
+          "operators",
+          "delimiters",
+          "precedence",
+          "types",
+          "grammar",
+          "grammar_ll1"
+        ],
+        "title": "LanguageResponse"
+      },
+      "PrecedenceLevel": {
+        "properties": {
+          "level": {
+            "type": "integer",
+            "title": "Level"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "operators": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Operators"
+          },
+          "associativity": {
+            "type": "string",
+            "title": "Associativity"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "level",
+          "name",
+          "operators",
+          "associativity"
+        ],
+        "title": "PrecedenceLevel"
+      },
+      "RunRequest": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "maxLength": 100000,
+            "title": "Source"
+          },
+          "stdin": {
+            "type": "string",
+            "title": "Stdin",
+            "default": ""
+          },
+          "optimize": {
+            "type": "boolean",
+            "title": "Optimize",
+            "default": true
+          },
+          "use_oracle": {
+            "type": "boolean",
+            "title": "Use Oracle",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "source"
+        ],
+        "title": "RunRequest"
+      },
+      "RunResponse": {
+        "properties": {
+          "stdout": {
+            "type": "string",
+            "title": "Stdout"
+          },
+          "exit_code": {
+            "type": "integer",
+            "title": "Exit Code"
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "steps_executed": {
+            "type": "integer",
+            "title": "Steps Executed"
+          },
+          "total_cost": {
+            "type": "integer",
+            "title": "Total Cost"
+          },
+          "diagnostics": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Diagnostics"
+          },
+          "snapshots": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Snapshots"
+          },
+          "truncated_snapshots": {
+            "type": "boolean",
+            "title": "Truncated Snapshots",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "stdout",
+          "exit_code",
+          "success",
+          "steps_executed",
+          "total_cost",
+          "diagnostics"
+        ],
+        "title": "RunResponse"
+      },
+      "SDDEvaluateRequest": {
+        "properties": {
+          "preset": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preset",
+            "default": "desk_calculator"
+          },
+          "custom_rules": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Rules"
+          },
+          "input_text": {
+            "type": "string",
+            "title": "Input Text",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "SDDEvaluateRequest"
+      },
+      "SDDEvaluateResponse": {
+        "properties": {
+          "annotated_tree": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Annotated Tree"
+          },
+          "dependency_graph": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Dependency Graph"
+          },
+          "evaluation_order": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evaluation Order"
+          },
+          "classification": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Classification"
+          },
+          "attributes": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Attributes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "annotated_tree",
+          "dependency_graph",
+          "evaluation_order",
+          "classification"
+        ],
+        "title": "SDDEvaluateResponse"
+      },
+      "SelfTestItem": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "passed": {
+            "type": "boolean",
+            "title": "Passed"
+          },
+          "expected": {
+            "type": "string",
+            "title": "Expected",
+            "default": ""
+          },
+          "actual": {
+            "type": "string",
+            "title": "Actual",
+            "default": ""
+          },
+          "diagnostics": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Diagnostics"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "category",
+          "passed"
+        ],
+        "title": "SelfTestItem"
+      },
+      "SelfTestResponse": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "passed": {
+            "type": "integer",
+            "title": "Passed"
+          },
+          "failed": {
+            "type": "integer",
+            "title": "Failed"
+          },
+          "pass_rate": {
+            "type": "number",
+            "title": "Pass Rate"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SelfTestItem"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "passed",
+          "failed",
+          "pass_rate",
+          "items"
+        ],
+        "title": "SelfTestResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VerifyRequest": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "maxLength": 100000,
+            "title": "Source"
+          },
+          "stdin": {
+            "type": "string",
+            "title": "Stdin",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "source"
+        ],
+        "title": "VerifyRequest"
+      },
+      "VerifyResponse": {
+        "properties": {
+          "match": {
+            "type": "boolean",
+            "title": "Match"
+          },
+          "oracle_unopt": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Oracle Unopt"
+          },
+          "oracle_opt": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Oracle Opt"
+          },
+          "vm": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Vm"
+          },
+          "diagnostics": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Diagnostics"
+          }
+        },
+        "type": "object",
+        "required": [
+          "match",
+          "oracle_unopt",
+          "oracle_opt",
+          "vm"
+        ],
+        "title": "VerifyResponse"
+      }
+    }
+  }
+}

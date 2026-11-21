@@ -1,18 +1,43 @@
 import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AppShell } from './components/layout/AppShell';
+import {
+  DashboardPage,
+  PlaygroundPage,
+  LexerPage,
+  ParserPage,
+  GrammarLabPage,
+  SemanticPage,
+  TreesPage,
+  IRPage,
+  OptimizerPage,
+  CodeGenPage,
+  VMPage,
+  ReferencePage,
+} from './pages';
 
 export const App: React.FC = () => {
   return (
-    <div className="flex h-screen w-screen flex-col bg-[#0d1117] text-zinc-100">
-      <header className="flex h-10 items-center justify-between border-b border-[#30363d] px-4">
-        <div className="flex items-center gap-2">
-          <span className="font-bold tracking-wide text-blue-400">VELA STUDIO</span>
-          <span className="text-xs text-zinc-400">CS 4031 Compiler Construction</span>
-        </div>
-      </header>
-      <main className="flex-1 p-6">
-        <h1 className="text-xl font-semibold">Vela Compiler & IDE Workbench</h1>
-        <p className="mt-2 text-sm text-zinc-400">Workspace initialized successfully.</p>
-      </main>
-    </div>
+    <BrowserRouter>
+      <AppShell>
+        <Routes>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/playground" element={<PlaygroundPage />} />
+          <Route path="/lexer" element={<LexerPage />} />
+          <Route path="/parser" element={<ParserPage />} />
+          <Route path="/grammar-lab" element={<GrammarLabPage />} />
+          <Route path="/semantic" element={<SemanticPage />} />
+          <Route path="/trees" element={<TreesPage />} />
+          <Route path="/ir" element={<IRPage />} />
+          <Route path="/optimizer" element={<OptimizerPage />} />
+          <Route path="/codegen" element={<CodeGenPage />} />
+          <Route path="/vm" element={<VMPage />} />
+          <Route path="/reference" element={<ReferencePage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AppShell>
+    </BrowserRouter>
   );
 };
+
+export default App;
