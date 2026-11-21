@@ -5,3 +5,4 @@ Record of AI-assisted sessions during the implementation of the Vela Compiler an
 | Session # | Date | Tool / Model | Task / Prompt Summary | Files Affected | Member / Role |
 |---|---|---|---|---|---|
 | 1 | 2026-11-21 | Antigravity (Gemini 3.8 Flash) | Run #1: Project initialization, workspace skeleton, environment setup (M0-T1) | `IMPLEMENTATION_STATUS.md`, `DECISION_LOG.md`, `AI_ASSISTANCE_LOG.md`, `CONTRIBUTIONS.md`, `ACKNOWLEDGEMENTS.md`, `backend/`, `frontend/`, `scripts/` | Implementation Agent |
+| 2 | 2026-11-21 | Antigravity (Gemini 3.8 Flash) | Run #1: M0-T2 Common foundations (`vela.common.source`, `diagnostics`, `limits`, `budget`), unit tests, `EXPLAIN_BACK.md` | `backend/vela/common/*`, `backend/tests/common/*`, `EXPLAIN_BACK.md` | Implementation Agent |

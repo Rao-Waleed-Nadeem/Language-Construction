@@ -5,7 +5,7 @@ Last updated: 2026-11-21   Run #: 1
 | ID | Task | Status | Verified by (command → result) | Date | Notes |
 |----|------|--------|--------------------------------|------|-------|
 | M0-T1 | Skeleton and tooling | DONE | `powershell -File .\scripts\test.ps1` → 2 passed, ruff clean, tsc clean; `npm run build` → exit 0; pure import OK | 2026-11-21 | Workspace, backend venv, frontend, scripts |
-| M0-T2 | Common foundations | TODO | | | |
+| M0-T2 | Common foundations | DONE | `powershell -File .\scripts\test.ps1` → 8 passed; covers normalization, line/col conversion, all 47 diagnostic codes | 2026-11-21 | SourceFile, Span, Diagnostic, Limits, Budget |
 | M1-T1 | Language tables | TODO | | | |
 | M1-T2 | DFA, buffer, scanner | TODO | | | |
 | M2-T1 | Model, loader, analysis | TODO | | | |
@@ -50,4 +50,6 @@ None yet.
 None.
 
 ## Run log
-- **Run #1 (2026-11-21):** Started project implementation from agent prompt. M0-T1 completed and verified (workspace skeleton, backend virtual environment, dependencies lock, Vite/React/TS frontend scaffold, automation scripts, and test suite). Next task: M0-T2.
+- **Run #1 (2026-11-21):**
+  - M0-T1: Workspace skeleton and tooling complete.
+  - M0-T2: Common foundations complete (`vela.common.source`, `diagnostics`, `limits`, `budget`). 8 unit tests passing. Milestone M0 complete. Next: M1-T1.
