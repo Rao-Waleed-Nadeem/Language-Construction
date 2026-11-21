@@ -101,3 +101,30 @@ Consolidated architectural summaries and viva preparation material for each comp
    **A:** The parser tracks `self.nesting_depth` upon entering each nonterminal or expression level. When `nesting_depth > 200`, it immediately emits diagnostic `VL-SYN-003` at the offending token and raises `NestingLimitExceededError`, safely unwinding the stack and returning a fail-soft `ParseResult`.
 3. **Q: How was the recursive-descent parser differentially validated against the LR family?**
    **A:** Using differential testing: the token streams of all valid example programs, invalid syntax error programs, and dozens of mutated sentences were fed into both the recursive-descent parser (operating on $G'$) and the SLR(1) shift-reduce table parser (operating on $G$). Both parsers agreed 100% on accept/reject decisions across all test cases.
+
+---
+
+## Milestone M4 — Semantic Analysis, SDD/SDT, and Expression DAG
+
+### Overview
+Milestone M4 delivers the semantic verification and intermediate structure layer (Phase 4 of the compiler pipeline). It comprises:
+- Strongly typed semantic representation: type system (`vela.semantic.types`), symbol table with hierarchical lexical scopes and shadowing detection (`vela.semantic.symbols`), and structural all-paths return analysis (`vela.semantic.returns`).
+- Two-pass semantic checker (`vela.semantic.checker`): Pass 1 registers global function prototypes and variable types; Pass 2 validates types, statements, assignment compatibility, array index constraints, loop controls, conditions, and inserts `ImplicitCast` AST nodes for numeric widening (`int` to `float`).
+- Error reporting: Handles all semantic invariant diagnostic codes (`VL-SEM-001` through `VL-SEM-023`) with exact token column and line coordinates matching the specification.
+- Syntax-Directed Definition (SDD) and Translation (SDT) engine (`vela.semantic.sdd`): safe AST expression evaluation without `eval`/`exec`, S-attributed vs L-attributed classification, attribute dependency graph construction, cycle detection, topological evaluation, and 4 educational presets (Desk Calculator, Type Declarations, Boolean Short-Circuit Labels, Vela Expression Typing).
+- Expression Directed Acyclic Graph (DAG) with value numbering (`vela.ast.dag`): common subexpression sharing across expressions and basic blocks, commutative operator normalization, tree-vs-DAG node count metrics, and step-by-step trace generation.
+
+### Key Algorithms & Design Choices
+1. **Two-Pass Type Checking & Widening**: Pass 1 collects top-level signatures, enabling out-of-order forward references and mutual recursion. Pass 2 checks expression types bottom-up, inserting `ImplicitCast` nodes for numeric widening (`int` to `float`).
+2. **Structural All-Paths Return Analysis**: Conservatively traverses control-flow AST nodes (`IfStmt`, `SwitchStmt`, `WhileStmt`, `Block`) ensuring every execution branch returns a value matching the function signature.
+3. **S/L-Attributed Classification**: Inspects rule production dependencies; verifies that inherited attributes depend strictly on parent inherited attributes or symbols strictly to the left on the RHS (flagging right-sibling dependencies with exact rule attribution).
+4. **Value Numbering for DAG Construction**: Canonical signatures for leaves and operators; commutative sorting for `+`, `*`, `==`, `!=`; variable def-kill tracking across assignments in basic blocks.
+5. **No `eval`/`exec`**: The SDD engine evaluates rules via an AST-based safe interpreter restricted to arithmetic, comparisons, ternary expressions, and whitelisted helper functions.
+
+### Viva Q&A
+1. **Q: How does the compiler distinguish between S-attributed and L-attributed definitions?**
+   **A:** An SDD is S-attributed if every attribute is synthesized (computed from children or intrinsic terminal values). An SDD is L-attributed if every inherited attribute $X_i.a$ in production $A \to X_1 \dots X_n$ depends only on inherited attributes of the parent $A$ or attributes of symbols $X_1 \dots X_{i-1}$ appearing strictly to the left of $X_i$. If an attribute depends on a right sibling $X_j$ ($j > i$) or a synthesized attribute of $A$, it violates the L-attributed property.
+2. **Q: How does Value Numbering in an Expression DAG enable Common Subexpression Elimination (CSE)?**
+   **A:** Value numbering assigns a unique identifier (value number) to each unique computation. When constructing an expression, the compiler checks if a node with the same operator and operand value numbers already exists. If so, it reuses the existing node instead of allocating a new one. In basic blocks, when a variable is reassigned, its mapping is updated to the new value number, naturally killing obsolete definitions while sharing unmutated subexpressions like `(a + b) * 2` and `(a + b) * 3`.
+3. **Q: Why is a two-pass semantic checker required rather than a single-pass traversal?**
+   **A:** A two-pass checker decouples declaration order from use. Pass 1 collects all global variable and function signatures into the root symbol table. Pass 2 type-checks function bodies and expressions. This allows mutually recursive functions and forward calls (functions called before their definition in the source file) to resolve cleanly with complete type information.

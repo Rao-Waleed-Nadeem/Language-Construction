@@ -72,3 +72,51 @@ The SDD/SDT engine evaluates attribute grammars over parse trees without executi
 2. **Type Declarations**: L-attributed type propagation distributing type from $T$ to list $L$.
 3. **Boolean Expression Labels**: Inherited and synthesized short-circuit flow labels.
 4. **Vela Expression Typing**: Bottom-up type determination and widening.
+
+---
+
+## 4. Directed Acyclic Graphs (DAG) for Expressions
+
+### 4.1 Concept and Purpose
+A Directed Acyclic Graph (DAG) is a compact representation of expressions where common subexpressions are shared rather than duplicated as in a traditional parse tree or AST (Dragon Book §6.1, §8.4; Master Spec D-04).
+In a basic block or expression list:
+- Leaves represent variables or literal constants.
+- Interior nodes represent operator applications pointing to operand child nodes.
+- When an identical subexpression is constructed, the existing node is identified via **Value Numbering** and reused.
+
+### 4.2 Value Numbering Algorithm
+1. **Signatures**:
+   - Literal leaf: `("LITERAL", value, type_name)`
+   - Variable leaf: `("VAR", var_name, version_or_id)`
+   - Operator interior node: `("OP", op, child_ids)`
+2. **Commutativity**:
+   - For commutative binary operators (`+`, `*`, `==`, `!=`), the child node IDs are sorted canonically (`min(left, right), max(left, right)`). This ensures expressions like `a + b` and `b + a` share the same DAG node.
+3. **Lookup and Construction**:
+   - Maintain a dictionary mapping signature $\to$ DAG node ID.
+   - For each expression, recursively evaluate children to obtain their DAG node IDs.
+   - Form the signature for the current node. If it exists in the table, reuse the existing node ID. Otherwise, create a new DAG node, assign a fresh ID, and register it in the table.
+
+### 4.3 Node Structure and Metrics
+Each `DAGNode` contains:
+- `id: int`: unique node number (value number).
+- `kind: str`: `"LITERAL"`, `"VAR"`, `"OP"`, or `"ARRAY_ACCESS"`.
+- `label: str`: human-readable label (e.g. `+`, `*`, `42`, `a`).
+- `children: list[int]`: list of child node IDs.
+- `parents: list[int]`: list of parent node IDs referencing this node.
+- `value: Any`: literal value if applicable.
+- `type_name: str | None`: inferred or declared type.
+
+**Metrics**:
+- `tree_node_count`: Number of nodes in the full AST tree without sharing.
+- `dag_node_count`: Number of unique DAG nodes.
+- `savings`: `tree_node_count - dag_node_count` (reduction in nodes via common subexpression sharing).
+
+### 4.4 Construction Trace
+To support frontend visualization and explainability, the builder logs step-by-step actions:
+- `step: int`: sequential step index.
+- `action: str`: `"CREATE_LEAF"`, `"CREATE_OP"`, or `"REUSE"`.
+- `signature: str`: string representation of the lookup signature.
+- `node_id: int`: ID of the node created or reused.
+- `reused: bool`: whether an existing node was shared.
+- `detail: str`: descriptive explanation of the step.
+

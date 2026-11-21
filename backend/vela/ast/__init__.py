@@ -1,5 +1,13 @@
 """Vela AST Package."""
 
+from vela.ast.dag import (
+    DAG,
+    DAGBuilder,
+    DAGBuildStep,
+    DAGNode,
+    build_block_dag,
+    build_expression_dag,
+)
 from vela.ast.nodes import (
     ArrayAccessExpr,
     AssignStmt,
@@ -33,6 +41,7 @@ from vela.ast.nodes import (
 from vela.ast.printer import ASTPrinter
 
 __all__ = [
+    "DAG",
     "ASTNode",
     "ASTPrinter",
     "ArrayAccessExpr",
@@ -45,6 +54,9 @@ __all__ = [
     "CaseClause",
     "CastExpr",
     "ContinueStmt",
+    "DAGBuildStep",
+    "DAGBuilder",
+    "DAGNode",
     "DoWhileStmt",
     "Expr",
     "ForStmt",
@@ -62,4 +74,6 @@ __all__ = [
     "UnaryExpr",
     "VarDecl",
     "VarRefExpr",
+    "build_block_dag",
+    "build_expression_dag",
 ]
